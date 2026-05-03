@@ -20,18 +20,18 @@ export default function Home() {
         background: "var(--background)",
       }}
     >
-      <div style={{ width: 340 }}>
+      <div style={{ width: 510 }}>
         <div
           style={{
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
-            marginBottom: 8,
+            marginBottom: 12,
           }}
         >
           <div
             style={{
-              fontSize: 10,
+              fontSize: 15,
               letterSpacing: "0.22em",
               color: "var(--muted)",
               textTransform: "uppercase",
@@ -41,7 +41,7 @@ export default function Home() {
           </div>
           <ThemeToggle />
         </div>
-        <div style={{ height: 1, background: "var(--border)", marginBottom: 24 }} />
+        <div style={{ height: 1, background: "var(--border)", marginBottom: 36 }} />
 
         <div style={{ border: "1px solid var(--border)" }}>
           {NAV_LINKS.map((link, i) => (
@@ -52,7 +52,7 @@ export default function Home() {
                 display: "flex",
                 justifyContent: "space-between",
                 alignItems: "center",
-                padding: "14px 16px",
+                padding: "21px 24px",
                 borderBottom:
                   i < NAV_LINKS.length - 1 ? "1px solid var(--border)" : undefined,
                 color: "var(--muted)",
@@ -62,7 +62,7 @@ export default function Home() {
             >
               <span
                 style={{
-                  fontSize: 11,
+                  fontSize: 16,
                   letterSpacing: "0.15em",
                   textTransform: "uppercase",
                   color: "var(--foreground)",
@@ -70,7 +70,7 @@ export default function Home() {
               >
                 {link.label}
               </span>
-              <span style={{ fontSize: 10, letterSpacing: "0.08em", color: "var(--muted)" }}>
+              <span style={{ fontSize: 15, letterSpacing: "0.08em", color: "var(--muted)" }}>
                 {link.sub}
               </span>
             </Link>

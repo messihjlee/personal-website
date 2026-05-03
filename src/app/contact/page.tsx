@@ -44,19 +44,19 @@ export default function ContactPage() {
           justifyContent: "center",
         }}
       >
-        <div style={{ width: 360 }}>
+        <div style={{ width: 540 }}>
           <div
             style={{
-              fontSize: 10,
+              fontSize: 15,
               letterSpacing: "0.18em",
               color: "var(--muted)",
               textTransform: "uppercase",
-              marginBottom: 8,
+              marginBottom: 12,
             }}
           >
             CONTACT
           </div>
-          <div style={{ height: 1, background: "var(--border)", marginBottom: 24 }} />
+          <div style={{ height: 1, background: "var(--border)", marginBottom: 36 }} />
 
           <div style={{ border: "1px solid var(--border)" }}>
             {links.map((link, i) => (
@@ -68,8 +68,8 @@ export default function ContactPage() {
                 style={{
                   display: "flex",
                   alignItems: "center",
-                  gap: 14,
-                  padding: "16px",
+                  gap: 21,
+                  padding: "24px",
                   borderBottom:
                     i < links.length - 1 ? "1px solid var(--border)" : undefined,
                   color: "var(--muted)",
@@ -77,20 +77,20 @@ export default function ContactPage() {
                   cursor: "pointer",
                 }}
               >
-                <link.icon size={16} style={{ flexShrink: 0, color: "var(--muted)" }} />
+                <link.icon size={24} style={{ flexShrink: 0, color: "var(--muted)" }} />
                 <div>
                   <div
                     style={{
-                      fontSize: 10,
+                      fontSize: 15,
                       letterSpacing: "0.12em",
                       textTransform: "uppercase",
                       color: "var(--foreground)",
-                      marginBottom: 2,
+                      marginBottom: 3,
                     }}
                   >
                     {link.label}
                   </div>
-                  <div style={{ fontSize: 12, color: "var(--muted)" }}>
+                  <div style={{ fontSize: 18, color: "var(--muted)" }}>
                     {link.display}
                   </div>
                 </div>

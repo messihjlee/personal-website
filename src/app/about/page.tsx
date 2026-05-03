@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import { readFileSync } from "fs";
 import { join } from "path";
 import { MdxContent } from "@/components/blog/MdxContent";
@@ -29,16 +28,6 @@ export default function AboutPage() {
         }}
       >
         <article style={{ maxWidth: 680, width: "100%", padding: "32px 24px" }}>
-          <div style={{ display: "flex", justifyContent: "center", marginBottom: 32 }}>
-            <Image
-              src="/images/profile_pic.png"
-              alt="Messi H.J. Lee"
-              width={160}
-              height={160}
-              style={{ objectFit: "cover", width: 160, height: 160 }}
-              priority
-            />
-          </div>
           <div style={{ color: "var(--muted)", fontSize: 15 }}>
             <MdxContent source={content} />
           </div>
