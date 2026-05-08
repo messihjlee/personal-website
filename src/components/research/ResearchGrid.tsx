@@ -40,7 +40,7 @@ function PubCard({
     >
       <p
         style={{
-          fontSize: 14,
+          fontSize: 12,
           lineHeight: 1.5,
           color: "var(--foreground)",
           margin: "0 0 8px",
@@ -59,7 +59,7 @@ function PubCard({
           flexShrink: 0,
         }}
       >
-        {pub.venue} · {pub.year}
+        {pub.year}
       </div>
     </button>
   );
