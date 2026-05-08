@@ -60,10 +60,10 @@
 }
 
 
-@misc{lee_token_2025,
-  title = {{Token Sampling Uncertainty Does Not Explain Homogeneity Bias} in {Large Language Models}},
-  author = {Lee, Messi H. J. and Jeon, Soyeon},
-  year = {2025},
+@misc{lee_token_2026,
+  title = {{Token-Level Entropy Reveals Demographic Disparities in Language Models}},
+  author = {Lee, Messi H. J.},
+  year = {2026},
   month = May,
   number = {arXiv:2501.19337},
   eprint = {2501.19337},
@@ -71,13 +71,13 @@
   publisher = {arXiv},
   doi = {10.48550/arXiv.2501.19337},
   url = {https://www.researchgate.net/publication/388634186_Homogeneity_Bias_as_Differential_Sampling_Uncertainty_in_Language_Models},
-  urldate = {2025-05-24},
-  abstract = {Homogeneity bias is one form of stereotyping in AI models where certain groups are represented as more similar to each other than other groups. This bias is a major obstacle to creating equitable language technologies. We test whether the bias is driven by systematic differences in token-sampling uncertainty across six large language models. While we observe the presence of homogeneity bias using sentence similarity, we find very little difference in token sampling uncertainty across groups. This finding elucidates why temperature-based sampling adjustments fail to mitigate homogeneity bias. It suggests researchers should prioritize interventions targeting representation learning mechanisms and training corpus composition rather than inference-time output manipulations. },
+  urldate = {2026-05-07},
+  abstract = {We ask whether demographic identity, signaled by a name alone, systematically reshapes the generative distribution of a language model. Measuring full-vocabulary Shannon entropy at temperature zero across six open-weight base models and 5,760 implicit sentence-completion prompts (e.g., "Tanisha walked into the office on a Monday morning and"), we find that Black-associated names produce higher first-token entropy than White-associated names across all six architectures - opposite to the output-level homogeneity bias documented under explicit demographic prompting (Lee et al., 2024) - and Black-associated names always produce greater entropy above identity-neutral baselines than White-associated names (  in all six models). Women-associated names co-occur with lower first-token entropy (DL-pooled    ) and more homogeneous outputs (   ) than men-associated names - a pattern convergent with homogeneity bias; race and gender effects are additive. Instruction tuning does not attenuate the race gap (matched-format DL-pooled    ). Running the same templates with explicit group labels instead of names yields null race effects in 10 of 12 models where implicit probing is significant - establishing that probing methodology is a primary determinant of which distributional structure is recovered.},
   archiveprefix = {arXiv},
   copyright = {All rights reserved},
   keywords = {Computer Science - Computation and Language,Computer Science - Computer Vision and Pattern Recognition},
   selected = {false},
-  pdf = {lee_token_2025.pdf}
+  pdf = {lee_token_2026.pdf}
 }
 
 
