@@ -50,6 +50,7 @@ function PubCard({
         <span className="pub-title-short">{truncateWords(pub.title, 5)}</span>
       </p>
       <div
+        className="grid-card-title"
         style={{
           fontSize: 12,
           letterSpacing: "0.12em",

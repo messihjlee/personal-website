@@ -42,6 +42,7 @@ export function BlogCard({ post }: { post: BlogPost }) {
             }}
           >
             <p
+              className="grid-card-title"
               style={{
                 fontSize: 13,
                 letterSpacing: "0.04em",
@@ -77,6 +78,7 @@ export function BlogCard({ post }: { post: BlogPost }) {
           }}
         >
           <p
+            className="grid-card-title"
             style={{
               fontSize: 13,
               letterSpacing: "0.04em",

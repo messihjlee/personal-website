@@ -48,8 +48,21 @@ body {
 .pub-title-short { display: none; }
 
 @media (max-width: 640px) {
+  .page-grid-wrap {
+    padding: 8px !important;
+  }
+
+  .blog-grid,
+  .research-grid {
+    gap: 8px !important;
+  }
+
+  .grid-card-title {
+    font-size: 10px !important;
+  }
+
   .pub-title-full { display: none; }
-  .pub-title-short { display: block; }
+  .pub-title-short { display: block; font-size: 10px; }
 
   .site-header-right {
     overflow-x: auto;

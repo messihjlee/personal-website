@@ -20,6 +20,7 @@ export default async function BlogPage() {
       }}
     >
       <div
+        className="page-grid-wrap"
         style={{
           borderTop: "1px solid var(--border)",
           height: "calc(100svh - 36px)",

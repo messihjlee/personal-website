@@ -22,6 +22,7 @@ export function BlogSlider({ posts }: { posts: BlogPost[] }) {
   return (
     <div style={{ width: "100%", height: "100%" }}>
       <div
+        className="blog-grid"
         style={{
           display: "grid",
           gridTemplateColumns: `repeat(${COLS}, 1fr)`,
