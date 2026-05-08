@@ -42,7 +42,7 @@ export function ResearchCard({ pub }: { pub: Publication }) {
           >
             {pub.venue} · {pub.year}
           </div>
-          <h2 style={{ fontSize: 16, fontWeight: 600, lineHeight: 1.4, color: "var(--foreground)", margin: 0 }}>
+          <h2 className="research-card-title" style={{ fontSize: 16, fontWeight: 600, lineHeight: 1.4, color: "var(--foreground)", margin: 0 }}>
             {linkUrl ? (
               <a
                 href={linkUrl}

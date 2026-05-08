@@ -42,9 +42,10 @@ export default function ContactPage() {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
+          padding: "0 16px",
         }}
       >
-        <div style={{ width: 540 }}>
+        <div style={{ maxWidth: 540, width: "100%" }}>
           <div
             style={{
               fontSize: 15,

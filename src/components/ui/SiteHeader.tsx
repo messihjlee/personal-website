@@ -38,10 +38,10 @@ export function SiteHeader() {
         FINDING-COLOR
       </Link>
 
-      <div style={{ display: "flex", alignItems: "center", gap: 24 }}>
+      <div className="site-header-right" style={{ display: "flex", alignItems: "center", gap: 24 }}>
         <nav style={{ display: "flex", gap: 24 }}>
           {NAV.map((item) => (
-            <Link key={item.href} href={item.href} style={linkStyle}>
+            <Link key={item.href} href={item.href} style={{ ...linkStyle, flexShrink: 0 }}>
               {item.label}
             </Link>
           ))}

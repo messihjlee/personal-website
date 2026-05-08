@@ -44,3 +44,21 @@ body {
 * {
   box-sizing: border-box;
 }
+
+@media (max-width: 640px) {
+  .research-card-title {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .site-header-right {
+    overflow-x: auto;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .site-header-right::-webkit-scrollbar {
+    display: none;
+  }
+}

@@ -18,9 +18,10 @@ export default function Home() {
         alignItems: "center",
         justifyContent: "center",
         background: "var(--background)",
+        padding: "0 16px",
       }}
     >
-      <div style={{ width: 510 }}>
+      <div style={{ maxWidth: 510, width: "100%" }}>
         <div
           style={{
             display: "flex",
