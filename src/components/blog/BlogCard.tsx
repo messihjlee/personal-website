@@ -43,7 +43,7 @@ export function BlogCard({ post }: { post: BlogPost }) {
           >
             <p
               style={{
-                fontSize: 11,
+                fontSize: 13,
                 letterSpacing: "0.04em",
                 color: "var(--foreground)",
                 lineHeight: 1.4,
@@ -53,7 +53,7 @@ export function BlogCard({ post }: { post: BlogPost }) {
             </p>
             <time
               style={{
-                fontSize: 10,
+                fontSize: 12,
                 letterSpacing: "0.08em",
                 color: "var(--muted)",
                 textTransform: "uppercase",
@@ -78,7 +78,7 @@ export function BlogCard({ post }: { post: BlogPost }) {
         >
           <p
             style={{
-              fontSize: 11,
+              fontSize: 13,
               letterSpacing: "0.04em",
               color: "var(--muted)",
               textAlign: "center",
