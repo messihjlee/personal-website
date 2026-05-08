@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
-import { PublicationGrid } from "@/components/projects/PublicationGrid";
-import { getPublications } from "@/lib/projects";
+import { ResearchGrid } from "@/components/research/ResearchGrid";
+import { getResearch } from "@/lib/research";
 
 export const metadata: Metadata = {
-  title: "Publications",
+  title: "Research",
 };
 
-export default function ProjectsPage() {
-  const publications = getPublications();
+export default function ResearchPage() {
+  const publications = getResearch();
 
   return (
     <div
@@ -24,7 +24,7 @@ export default function ProjectsPage() {
           padding: "24px 16px",
         }}
       >
-        <PublicationGrid publications={publications} />
+        <ResearchGrid publications={publications} />
       </div>
     </div>
   );

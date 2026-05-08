@@ -1,11 +1,11 @@
-import type { Publication } from "@/lib/projects";
+import type { Publication } from "@/lib/research";
 import { ExternalLink, FileText } from "lucide-react";
 
 function truncate(text: string, max: number) {
   return text.length > max ? text.slice(0, max) + "…" : text;
 }
 
-export function PublicationCard({ pub }: { pub: Publication }) {
+export function ResearchCard({ pub }: { pub: Publication }) {
   const doiUrl = pub.doi ? `https://doi.org/${pub.doi}` : undefined;
   const arxivUrl = pub.arxiv ? `https://arxiv.org/abs/${pub.arxiv}` : undefined;
   const linkUrl = pub.url || doiUrl || arxivUrl;

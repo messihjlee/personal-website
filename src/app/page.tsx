@@ -4,7 +4,7 @@ import { ThemeToggle } from "@/components/ui/ThemeToggle";
 const NAV_LINKS = [
   { href: "/blog",     label: "BLOG",     sub: "writing"  },
   { href: "/about",    label: "ABOUT",    sub: "profile"  },
-  { href: "/projects", label: "PROJECTS", sub: "research" },
+  { href: "/research", label: "RESEARCH", sub: "research" },
   { href: "/contact",  label: "CONTACT",  sub: "links"    },
 ];
 

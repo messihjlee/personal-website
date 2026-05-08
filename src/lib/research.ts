@@ -133,7 +133,7 @@ function toPublication(
   return { title, authors, year, venue, url, doi, arxiv, pdf, abstract, selected };
 }
 
-export function getPublications(): Publication[] {
+export function getResearch(): Publication[] {
   const bibPath = path.join(process.cwd(), "content", "papers.bib");
   const content = fs.readFileSync(bibPath, "utf-8");
   return parseEntries(content)

@@ -1,8 +1,8 @@
-import { getPublications } from "@/lib/projects";
-import { PublicationCard } from "./ProjectCard";
+import { getResearch } from "@/lib/research";
+import { ResearchCard } from "./ResearchCard";
 
-export function ProjectList() {
-  const publications = getPublications();
+export function ResearchList() {
+  const publications = getResearch();
   const selected = publications.filter((p) => p.selected);
   const others = publications.filter((p) => !p.selected);
 
@@ -15,7 +15,7 @@ export function ProjectList() {
           </h2>
           <div className="mt-4">
             {selected.map((pub) => (
-              <PublicationCard key={pub.title} pub={pub} />
+              <ResearchCard key={pub.title} pub={pub} />
             ))}
           </div>
         </div>
@@ -28,7 +28,7 @@ export function ProjectList() {
           </h2>
           <div className="mt-4">
             {others.map((pub) => (
-              <PublicationCard key={pub.title} pub={pub} />
+              <ResearchCard key={pub.title} pub={pub} />
             ))}
           </div>
         </div>

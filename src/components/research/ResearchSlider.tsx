@@ -2,10 +2,10 @@
 
 import { useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import type { Publication } from "@/lib/projects";
-import { PublicationCard } from "./ProjectCard";
+import type { Publication } from "@/lib/research";
+import { ResearchCard } from "./ResearchCard";
 
-export function PublicationSlider({ publications }: { publications: Publication[] }) {
+export function ResearchSlider({ publications }: { publications: Publication[] }) {
   const [page, setPage] = useState(0);
 
   const PER_PAGE = 3;
@@ -45,7 +45,7 @@ export function PublicationSlider({ publications }: { publications: Publication[
           marginBottom: 8,
         }}
       >
-        PUBLICATIONS
+        RESEARCH
       </div>
       <div style={{ height: 1, background: "var(--border)", marginBottom: 32 }} />
 
@@ -61,7 +61,7 @@ export function PublicationSlider({ publications }: { publications: Publication[
 
         <div style={{ flex: 1, overflowY: "auto", display: "flex", flexDirection: "column", gap: 12 }}>
           {current.map((pub) => (
-            <PublicationCard key={pub.title} pub={pub} />
+            <ResearchCard key={pub.title} pub={pub} />
           ))}
         </div>
 

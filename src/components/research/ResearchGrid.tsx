@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { ExternalLink, FileText, X } from "lucide-react";
-import type { Publication } from "@/lib/projects";
+import type { Publication } from "@/lib/research";
 
 function truncate(s: string, max: number) {
   return s.length > max ? s.slice(0, max) + "…" : s;
@@ -35,7 +35,7 @@ function PubCard({
     >
       <p
         style={{
-          fontSize: 12,
+          fontSize: 14,
           lineHeight: 1.5,
           color: "var(--foreground)",
           margin: "0 0 8px",
@@ -45,7 +45,7 @@ function PubCard({
       </p>
       <div
         style={{
-          fontSize: 10,
+          fontSize: 12,
           letterSpacing: "0.12em",
           textTransform: "uppercase",
           color: "var(--muted)",
@@ -252,7 +252,7 @@ function PubModal({
   );
 }
 
-export function PublicationGrid({ publications }: { publications: Publication[] }) {
+export function ResearchGrid({ publications }: { publications: Publication[] }) {
   const [selected, setSelected] = useState<Publication | null>(null);
 
   return (
