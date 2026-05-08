@@ -40,7 +40,7 @@ function PubCard({
     >
       <p
         style={{
-          fontSize: 12,
+          fontSize: 13,
           lineHeight: 1.5,
           color: "var(--foreground)",
           margin: "0 0 8px",
@@ -53,13 +53,13 @@ function PubCard({
         className="grid-card-title"
         style={{
           fontSize: 12,
-          letterSpacing: "0.12em",
+          letterSpacing: "0.08em",
           textTransform: "uppercase",
           color: "var(--muted)",
           flexShrink: 0,
         }}
       >
-        {pub.year}
+        {pub.month ? `${pub.month} ${pub.year}` : pub.year}
       </div>
     </button>
   );

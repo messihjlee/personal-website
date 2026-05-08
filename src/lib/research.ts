@@ -5,6 +5,7 @@ export interface Publication {
   title: string;
   authors: string;
   year: number;
+  month?: string;
   venue: string;
   url?: string;
   doi?: string;
@@ -105,6 +106,12 @@ function parseEntries(
   return entries;
 }
 
+const MONTH_MAP: Record<string, string> = {
+  jan: "Jan", feb: "Feb", mar: "Mar", apr: "Apr",
+  may: "May", jun: "Jun", jul: "Jul", aug: "Aug",
+  sep: "Sep", oct: "Oct", nov: "Nov", dec: "Dec",
+};
+
 function toPublication(
   type: string,
   fields: Record<string, string>
@@ -118,6 +125,7 @@ function toPublication(
   const doi = fields.doi || undefined;
   const arxiv = fields.eprint || undefined;
   const pdf = fields.pdf || undefined;
+  const month = MONTH_MAP[fields.month?.toLowerCase().slice(0, 3) ?? ""] || undefined;
 
   let venue = "";
   if (type === "article") {
@@ -130,7 +138,7 @@ function toPublication(
 
   if (!title || !authors || !year) return null;
 
-  return { title, authors, year, venue, url, doi, arxiv, pdf, abstract, selected };
+  return { title, authors, year, month, venue, url, doi, arxiv, pdf, abstract, selected };
 }
 
 export function getResearch(): Publication[] {
