@@ -34,6 +34,7 @@ function PubCard({
       }}
     >
       <p
+        className="pub-card-title"
         style={{
           fontSize: 14,
           lineHeight: 1.5,
@@ -258,6 +259,7 @@ export function ResearchGrid({ publications }: { publications: Publication[] }) 
   return (
     <>
       <div
+        className="research-grid"
         style={{
           display: "grid",
           gridTemplateColumns: "repeat(3, 1fr)",
