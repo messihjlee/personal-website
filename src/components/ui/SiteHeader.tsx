@@ -16,7 +16,7 @@ const linkStyle: React.CSSProperties = {
   textTransform: "uppercase",
 };
 
-export function SiteHeader() {
+export function SiteHeader({ homeLabel = "FINDING-COLOR" }: { homeLabel?: string }) {
   return (
     <div
       style={{
@@ -35,7 +35,7 @@ export function SiteHeader() {
       }}
     >
       <Link href="/" style={linkStyle} aria-label="Home">
-        FINDING-COLOR
+        {homeLabel}
       </Link>
 
       <div className="site-header-right" style={{ display: "flex", alignItems: "center", gap: 24 }}>

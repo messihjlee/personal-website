@@ -6,5 +6,5 @@ import { SiteHeader } from "./SiteHeader";
 export function GlobalHeader() {
   const pathname = usePathname();
   if (pathname === "/") return null;
-  return <SiteHeader />;
+  return <SiteHeader homeLabel="HOME" />;
 }
