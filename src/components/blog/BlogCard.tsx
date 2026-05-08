@@ -44,7 +44,7 @@ export function BlogCard({ post }: { post: BlogPost }) {
             <p
               className="grid-card-title"
               style={{
-                fontSize: 13,
+                fontSize: 15,
                 letterSpacing: "0.04em",
                 color: "var(--foreground)",
                 lineHeight: 1.4,
@@ -80,7 +80,7 @@ export function BlogCard({ post }: { post: BlogPost }) {
           <p
             className="grid-card-title"
             style={{
-              fontSize: 13,
+              fontSize: 15,
               letterSpacing: "0.04em",
               color: "var(--muted)",
               textAlign: "center",
