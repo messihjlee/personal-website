@@ -20,7 +20,7 @@ export function ThemeToggle({ style }: { style?: React.CSSProperties }) {
       style={{
         background: "none",
         border: "1px solid var(--border)",
-        color: "var(--muted)",
+        color: "var(--foreground)",
         padding: "3px 8px",
         cursor: "pointer",
         fontSize: 9,

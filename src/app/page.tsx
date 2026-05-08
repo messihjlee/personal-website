@@ -34,7 +34,7 @@ export default function Home() {
             style={{
               fontSize: 15,
               letterSpacing: "0.22em",
-              color: "var(--muted)",
+              color: "var(--foreground)",
               textTransform: "uppercase",
             }}
           >
