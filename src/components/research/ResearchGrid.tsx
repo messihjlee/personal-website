@@ -8,6 +8,11 @@ function truncate(s: string, max: number) {
   return s.length > max ? s.slice(0, max) + "…" : s;
 }
 
+function truncateWords(s: string, n: number) {
+  const words = s.split(" ");
+  return words.length > n ? words.slice(0, n).join(" ") + "…" : s;
+}
+
 function PubCard({
   pub,
   onClick,
@@ -34,7 +39,6 @@ function PubCard({
       }}
     >
       <p
-        className="pub-card-title"
         style={{
           fontSize: 14,
           lineHeight: 1.5,
@@ -42,7 +46,8 @@ function PubCard({
           margin: "0 0 8px",
         }}
       >
-        {truncate(pub.title, 120)}
+        <span className="pub-title-full">{truncate(pub.title, 120)}</span>
+        <span className="pub-title-short">{truncateWords(pub.title, 5)}</span>
       </p>
       <div
         style={{

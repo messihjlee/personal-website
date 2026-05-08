@@ -45,18 +45,11 @@ body {
   box-sizing: border-box;
 }
 
-@media (max-width: 640px) {
-  .research-grid {
-    grid-template-columns: 1fr !important;
-    height: auto !important;
-  }
+.pub-title-short { display: none; }
 
-  .pub-card-title {
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
+@media (max-width: 640px) {
+  .pub-title-full { display: none; }
+  .pub-title-short { display: block; }
 
   .site-header-right {
     overflow-x: auto;
