@@ -109,7 +109,7 @@ export default async function BlogPostPage({
             )}
           </header>
 
-          <div style={{ color: "var(--muted)" }}>
+          <div style={{ color: "var(--foreground)" }}>
             <MdxContent source={post.content} />
           </div>
         </article>
