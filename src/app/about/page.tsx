@@ -28,7 +28,7 @@ export default function AboutPage() {
         }}
       >
         <article style={{ maxWidth: 680, width: "100%", padding: "32px 24px" }}>
-          <div style={{ color: "var(--foreground)", fontSize: 15 }}>
+          <div style={{ color: "var(--foreground)", fontSize: 17 }}>
             <MdxContent source={content} />
           </div>
         </article>
