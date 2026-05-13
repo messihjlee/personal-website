@@ -35,8 +35,7 @@ export function ResearchCard({ pub }: { pub: Publication }) {
             style={{
               fontSize: 10,
               letterSpacing: "0.14em",
-              color: "var(--muted)",
-              textTransform: "uppercase",
+              color: "var(--foreground)",
               marginBottom: 10,
             }}
           >
@@ -83,7 +82,7 @@ export function ResearchCard({ pub }: { pub: Publication }) {
       <p
         style={{
           fontSize: 13,
-          color: "var(--muted)",
+          color: "var(--foreground)",
           lineHeight: 1.7,
           margin: 0,
         }}

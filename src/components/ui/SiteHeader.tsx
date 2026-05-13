@@ -5,9 +5,9 @@ import { useState, useRef, useEffect } from "react";
 import { ThemeToggle } from "./ThemeToggle";
 
 const NAV = [
-  { href: "/",         label: "HOME"     },
-  { href: "/blog",     label: "BLOG"     },
-  { href: "/research", label: "RESEARCH" },
+  { href: "/",         label: "home"     },
+  { href: "/blog",     label: "blog"     },
+  { href: "/research", label: "research" },
 ];
 
 const labelStyle: React.CSSProperties = {
@@ -15,10 +15,9 @@ const labelStyle: React.CSSProperties = {
   letterSpacing: "0.14em",
   color: "var(--foreground)",
   textDecoration: "none",
-  textTransform: "uppercase",
 };
 
-export function SiteHeader({ homeLabel = "FINDING-COLOR" }: { homeLabel?: string }) {
+export function SiteHeader({ homeLabel = "finding-color" }: { homeLabel?: string }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 

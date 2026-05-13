@@ -45,17 +45,16 @@ export default function ContactPage() {
           padding: "0 16px",
         }}
       >
-        <div style={{ maxWidth: 540, width: "100%" }}>
+        <div style={{ maxWidth: 510, width: "100%" }}>
           <div
             style={{
               fontSize: 15,
               letterSpacing: "0.18em",
-              color: "var(--muted)",
-              textTransform: "uppercase",
+              color: "var(--foreground)",
               marginBottom: 12,
             }}
           >
-            CONTACT
+            contact
           </div>
           <div style={{ height: 1, background: "var(--border)", marginBottom: 36 }} />
 
@@ -70,7 +69,7 @@ export default function ContactPage() {
                   display: "flex",
                   alignItems: "center",
                   gap: 21,
-                  padding: "24px",
+                  padding: "21px 24px",
                   borderBottom:
                     i < links.length - 1 ? "1px solid var(--border)" : undefined,
                   color: "var(--muted)",
@@ -78,20 +77,19 @@ export default function ContactPage() {
                   cursor: "pointer",
                 }}
               >
-                <link.icon size={24} style={{ flexShrink: 0, color: "var(--muted)" }} />
+                <link.icon size={24} style={{ flexShrink: 0, color: "var(--foreground)" }} />
                 <div>
                   <div
                     style={{
-                      fontSize: 15,
-                      letterSpacing: "0.12em",
-                      textTransform: "uppercase",
+                      fontSize: 16,
+                      letterSpacing: "0.15em",
                       color: "var(--foreground)",
                       marginBottom: 3,
                     }}
                   >
-                    {link.label}
+                    {link.label.toLowerCase()}
                   </div>
-                  <div style={{ fontSize: 18, color: "var(--muted)" }}>
+                  <div style={{ fontSize: 15, letterSpacing: "0.08em", color: "var(--foreground)" }}>
                     {link.display}
                   </div>
                 </div>

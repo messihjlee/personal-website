@@ -54,8 +54,7 @@ function PubCard({
         style={{
           fontSize: 12,
           letterSpacing: "0.08em",
-          textTransform: "uppercase",
-          color: "var(--muted)",
+          color: "var(--foreground)",
           flexShrink: 0,
         }}
       >
@@ -119,8 +118,7 @@ function PubModal({
             style={{
               fontSize: 10,
               letterSpacing: "0.14em",
-              textTransform: "uppercase",
-              color: "var(--muted)",
+              color: "var(--foreground)",
             }}
           >
             {pub.venue} · {pub.year}
@@ -158,7 +156,7 @@ function PubModal({
           <p
             style={{
               fontSize: 11,
-              color: "var(--muted)",
+              color: "var(--foreground)",
               margin: "0 0 20px",
               lineHeight: 1.6,
             }}
@@ -169,7 +167,7 @@ function PubModal({
           <p
             style={{
               fontSize: 13,
-              color: "var(--muted)",
+              color: "var(--foreground)",
               lineHeight: 1.8,
               margin: 0,
             }}
@@ -200,14 +198,13 @@ function PubModal({
                   gap: 6,
                   fontSize: 10,
                   letterSpacing: "0.1em",
-                  textTransform: "uppercase",
-                  color: "var(--muted)",
+                  color: "var(--foreground)",
                   textDecoration: "none",
                   border: "1px solid var(--border)",
                   padding: "4px 10px",
                 }}
               >
-                <FileText size={12} /> PDF
+                <FileText size={12} /> pdf
               </a>
             )}
             {arxivUrl && (
@@ -221,14 +218,13 @@ function PubModal({
                   gap: 6,
                   fontSize: 10,
                   letterSpacing: "0.1em",
-                  textTransform: "uppercase",
-                  color: "var(--muted)",
+                  color: "var(--foreground)",
                   textDecoration: "none",
                   border: "1px solid var(--border)",
                   padding: "4px 10px",
                 }}
               >
-                <ExternalLink size={12} /> arXiv
+                <ExternalLink size={12} /> arxiv
               </a>
             )}
             {linkUrl && linkUrl !== arxivUrl && (
@@ -242,14 +238,13 @@ function PubModal({
                   gap: 6,
                   fontSize: 10,
                   letterSpacing: "0.1em",
-                  textTransform: "uppercase",
-                  color: "var(--muted)",
+                  color: "var(--foreground)",
                   textDecoration: "none",
                   border: "1px solid var(--border)",
                   padding: "4px 10px",
                 }}
               >
-                <ExternalLink size={12} /> Paper
+                <ExternalLink size={12} /> paper
               </a>
             )}
           </div>
@@ -259,26 +254,76 @@ function PubModal({
   );
 }
 
+const PAGE_SIZE = 9;
+
 export function ResearchGrid({ publications }: { publications: Publication[] }) {
   const [selected, setSelected] = useState<Publication | null>(null);
+  const [page, setPage] = useState(0);
+
+  const totalPages = Math.ceil(publications.length / PAGE_SIZE);
+  const paged = publications.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
+  const padded = [...paged, ...Array(PAGE_SIZE - paged.length).fill(null)] as (Publication | null)[];
 
   return (
     <>
-      <div
-        className="research-grid"
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(3, 1fr)",
-          gap: 12,
-          width: "100%",
-          height: "100%",
-        }}
-      >
-        {publications.map((pub) => (
-          <div key={pub.title} style={{ minHeight: 0, minWidth: 0 }}>
-            <PubCard pub={pub} onClick={() => setSelected(pub)} />
+      <div style={{ display: "flex", flexDirection: "column", height: "100%", gap: 12 }}>
+        <div
+          className="research-grid"
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(3, 1fr)",
+            gridTemplateRows: "repeat(3, 1fr)",
+            gap: 12,
+            width: "100%",
+            flex: 1,
+          }}
+        >
+          {padded.map((pub, i) => (
+            <div key={pub ? pub.title : `empty-${i}`} style={{ minHeight: 0, minWidth: 0 }}>
+              {pub && <PubCard pub={pub} onClick={() => setSelected(pub)} />}
+            </div>
+          ))}
+        </div>
+
+        {totalPages > 1 && (
+          <div style={{ display: "flex", justifyContent: "center", gap: 8 }}>
+            <button
+              onClick={() => setPage((p) => Math.max(0, p - 1))}
+              disabled={page === 0}
+              style={{
+                fontSize: 10,
+                letterSpacing: "0.12em",
+                color: page === 0 ? "var(--muted)" : "var(--foreground)",
+                background: "none",
+                border: "1px solid var(--border)",
+                padding: "4px 12px",
+                cursor: page === 0 ? "default" : "pointer",
+                fontFamily: "inherit",
+              }}
+            >
+              prev
+            </button>
+            <span style={{ fontSize: 10, letterSpacing: "0.12em", color: "var(--muted)", alignSelf: "center" }}>
+              {page + 1} / {totalPages}
+            </span>
+            <button
+              onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
+              disabled={page === totalPages - 1}
+              style={{
+                fontSize: 10,
+                letterSpacing: "0.12em",
+                color: page === totalPages - 1 ? "var(--muted)" : "var(--foreground)",
+                background: "none",
+                border: "1px solid var(--border)",
+                padding: "4px 12px",
+                cursor: page === totalPages - 1 ? "default" : "pointer",
+                fontFamily: "inherit",
+              }}
+            >
+              next
+            </button>
           </div>
-        ))}
+        )}
       </div>
 
       {selected && (

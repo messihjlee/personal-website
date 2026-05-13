@@ -57,8 +57,7 @@ export function BlogCard({ post }: { post: BlogPost }) {
                 fontSize: 12,
                 letterSpacing: "0.08em",
                 color: "var(--muted)",
-                textTransform: "uppercase",
-              }}
+                }}
             >
               {new Date(post.date).toLocaleDateString("en-US", {
                 year: "numeric",
@@ -70,11 +69,11 @@ export function BlogCard({ post }: { post: BlogPost }) {
       ) : (
         <div
           style={{
-            display: "flex",
-            height: "100%",
-            alignItems: "center",
-            justifyContent: "center",
-            padding: 12,
+            position: "absolute",
+            bottom: 0,
+            left: 0,
+            right: 0,
+            padding: "12px",
           }}
         >
           <p
@@ -82,12 +81,24 @@ export function BlogCard({ post }: { post: BlogPost }) {
             style={{
               fontSize: 15,
               letterSpacing: "0.04em",
-              color: "var(--muted)",
-              textAlign: "center",
+              color: "var(--foreground)",
+              lineHeight: 1.4,
             }}
           >
             {post.title}
           </p>
+          <time
+            style={{
+              fontSize: 12,
+              letterSpacing: "0.08em",
+              color: "var(--muted)",
+            }}
+          >
+            {new Date(post.date).toLocaleDateString("en-US", {
+              year: "numeric",
+              month: "short",
+            })}
+          </time>
         </div>
       )}
     </Link>

@@ -2,10 +2,10 @@ import Link from "next/link";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 
 const NAV_LINKS = [
-  { href: "/blog",     label: "BLOG",     sub: "writing"  },
-  { href: "/about",    label: "ABOUT",    sub: "profile"  },
-  { href: "/research", label: "RESEARCH", sub: "research" },
-  { href: "/contact",  label: "CONTACT",  sub: "links"    },
+  { href: "/blog",     label: "blog",     sub: "writing"  },
+  { href: "/about",    label: "about",    sub: "profile"  },
+  { href: "/research", label: "research", sub: "research" },
+  { href: "/contact",  label: "contact",  sub: "links"    },
 ];
 
 export default function Home() {
@@ -35,10 +35,9 @@ export default function Home() {
               fontSize: 15,
               letterSpacing: "0.22em",
               color: "var(--foreground)",
-              textTransform: "uppercase",
             }}
           >
-            FINDING-COLOR
+            finding-color
           </div>
           <ThemeToggle />
         </div>
@@ -65,7 +64,6 @@ export default function Home() {
                 style={{
                   fontSize: 16,
                   letterSpacing: "0.15em",
-                  textTransform: "uppercase",
                   color: "var(--foreground)",
                 }}
               >

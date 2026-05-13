@@ -25,13 +25,12 @@ export function ThemeToggle({ style }: { style?: React.CSSProperties }) {
         cursor: "pointer",
         fontSize: 9,
         letterSpacing: "0.14em",
-        textTransform: "uppercase",
         lineHeight: 1.6,
         fontFamily: "inherit",
         ...style,
       }}
     >
-      {isDark ? "LIGHT" : "DARK"}
+      {isDark ? "light" : "dark"}
     </button>
   );
 }
