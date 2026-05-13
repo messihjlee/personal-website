@@ -54,7 +54,7 @@ function pageToPost(page: any, content = ""): BlogPost {
 
   const titleProp = props["title"] ?? Object.values(props).find((p: any) => p?.type === "title");
   const title = extractText(titleProp);
-  const slug = `${page.id.split("-")[0]}-${slugify(title)}`;
+  const slug = `${page.id.replace(/-/g, "").slice(0, 12)}-${slugify(title)}`;
 
   const date =
     props["date"]?.type === "date" && props["date"].date
@@ -116,7 +116,7 @@ export async function getPostBySlug(
 
   const page = response.results.find((p: any) => {
     if (!("properties" in p)) return false;
-    return p.id.startsWith(idPrefix);
+    return p.id.replace(/-/g, "").startsWith(idPrefix);
   });
 
   if (!page || !("properties" in page)) return null;
