@@ -20,45 +20,79 @@ function PubCard({
   pub: Publication;
   onClick: () => void;
 }) {
+  const [hovered, setHovered] = useState(false);
+
   return (
     <button
       onClick={onClick}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
       style={{
         display: "flex",
         flexDirection: "column",
-        justifyContent: "flex-end",
-        alignItems: "flex-start",
+        justifyContent: "center",
+        alignItems: "center",
         width: "100%",
         height: "100%",
         padding: "14px",
         border: "1px solid var(--border)",
         background: "var(--card)",
         cursor: "pointer",
-        textAlign: "left",
+        textAlign: "center",
         fontFamily: "inherit",
+        position: "relative",
+        overflow: "hidden",
       }}
     >
-      <p
-        style={{
-          fontSize: 13,
-          lineHeight: 1.5,
-          color: "var(--foreground)",
-          margin: "0 0 8px",
-        }}
-      >
-        <span className="pub-title-full">{truncate(pub.title, 120)}</span>
-        <span className="pub-title-short">{truncateWords(pub.title, 5)}</span>
-      </p>
-      <div
-        className="grid-card-title"
-        style={{
-          fontSize: 12,
-          letterSpacing: "0.08em",
-          color: "var(--foreground)",
-          flexShrink: 0,
-        }}
-      >
-        {pub.month ? `${pub.month} ${pub.year}` : pub.year}
+      {/* Abstract overlay — grey mask + centered text on hover */}
+      {pub.abstract && (
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            zIndex: 1,
+            background: "rgba(20,21,24,0.92)",
+            opacity: hovered ? 1 : 0,
+            transition: "opacity 0.18s ease",
+            pointerEvents: "none",
+            padding: "16px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <p
+            style={{
+              fontSize: 13,
+              lineHeight: 1.7,
+              color: "rgba(255,255,255,0.85)",
+              margin: 0,
+              textAlign: "center",
+              display: "-webkit-box",
+              WebkitLineClamp: 6,
+              WebkitBoxOrient: "vertical",
+              overflow: "hidden",
+            }}
+          >
+            {pub.abstract}
+          </p>
+        </div>
+      )}
+
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8, position: "relative" }}>
+        <div
+          className="pub-card-date"
+          style={{ letterSpacing: "0.1em", color: "var(--muted)" }}
+        >
+          {pub.month ? `${pub.month} ${pub.year}` : pub.year}
+        </div>
+        <p
+          className="pub-card-title"
+          style={{ lineHeight: 1.5, color: "var(--foreground)", margin: 0 }}
+        >
+          <span className="pub-title-full">{truncate(pub.title, 120)}</span>
+          <span className="pub-title-short">{truncateWords(pub.title, 5)}</span>
+        </p>
       </div>
     </button>
   );

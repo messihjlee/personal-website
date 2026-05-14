@@ -47,6 +47,12 @@ body {
 
 .pub-title-short { display: none; }
 
+.pub-card-date  { font-size: 13px; }
+.pub-card-title { font-size: 16px; }
+
+.blog-card-date  { font-size: 13px; }
+.blog-card-title { font-size: 16px; }
+
 @media (max-width: 640px) {
   .page-grid-wrap {
     padding: 8px !important;
@@ -63,6 +69,12 @@ body {
 
   .pub-title-full { display: none; }
   .pub-title-short { display: block; font-size: 10px; }
+
+  .pub-card-date  { font-size: 10px; }
+  .pub-card-title { font-size: 10px; }
+
+  .blog-card-date  { font-size: 10px; }
+  .blog-card-title { font-size: 10px; }
 
   .site-header-right {
     overflow-x: auto;

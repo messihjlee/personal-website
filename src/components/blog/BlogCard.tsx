@@ -42,9 +42,8 @@ export function BlogCard({ post }: { post: BlogPost }) {
             }}
           >
             <p
-              className="grid-card-title"
+              className="grid-card-title blog-card-title"
               style={{
-                fontSize: 15,
                 letterSpacing: "0.04em",
                 color: "var(--foreground)",
                 lineHeight: 1.4,
@@ -53,8 +52,8 @@ export function BlogCard({ post }: { post: BlogPost }) {
               {post.title}
             </p>
             <time
+              className="blog-card-date"
               style={{
-                fontSize: 12,
                 letterSpacing: "0.08em",
                 color: "var(--muted)",
                 }}
