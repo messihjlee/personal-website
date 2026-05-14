@@ -10,6 +10,7 @@ const NAV = [
   { href: "/blog",     label: "blog"     },
   { href: "/about",    label: "about"    },
   { href: "/research", label: "research" },
+  { href: "/contact",  label: "contact"  },
 ];
 
 const labelStyle: React.CSSProperties = {

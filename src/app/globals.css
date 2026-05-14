@@ -58,6 +58,10 @@ body {
     padding: 8px !important;
   }
 
+  .contact-grid {
+    grid-template-columns: 1fr !important;
+  }
+
   .blog-grid,
   .research-grid {
     gap: 8px !important;
