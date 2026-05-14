@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Space_Grotesk } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
 import { Providers } from "./providers";
 import { GlobalHeader } from "@/components/ui/GlobalHeader";
 import { siteConfig } from "@/lib/constants";
@@ -30,6 +31,7 @@ export default function RootLayout({
         <Providers>
           <GlobalHeader />
           {children}
+          <Analytics />
         </Providers>
       </body>
     </html>
