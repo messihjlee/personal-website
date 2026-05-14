@@ -2,13 +2,28 @@ import type { Metadata } from "next";
 import { readFileSync } from "fs";
 import { join } from "path";
 import { MdxContent } from "@/components/blog/MdxContent";
+import { AboutPanel } from "@/components/about/AboutPanel";
 
 export const metadata: Metadata = {
   title: "About",
 };
 
+const SECTIONS = [
+  { slug: "researcher", title: "researcher" },
+  { slug: "person",     title: "person" },
+  { slug: "now",        title: "now" },
+  { slug: "connect",    title: "connect" },
+];
+
 export default function AboutPage() {
-  const content = readFileSync(join(process.cwd(), "src/content/about.md"), "utf-8");
+  const sections = SECTIONS.map(({ slug, title }) => ({
+    title,
+    rendered: (
+      <MdxContent
+        source={readFileSync(join(process.cwd(), `src/content/about/${slug}.md`), "utf-8")}
+      />
+    ),
+  }));
 
   return (
     <div
@@ -25,13 +40,10 @@ export default function AboutPage() {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
+          padding: "24px 16px",
         }}
       >
-        <article style={{ maxWidth: 680, width: "100%", padding: "32px 24px" }}>
-          <div style={{ color: "var(--foreground)", fontSize: 17 }}>
-            <MdxContent source={content} />
-          </div>
-        </article>
+        <AboutPanel sections={sections} />
       </div>
     </div>
   );

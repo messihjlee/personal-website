@@ -1,0 +1,3 @@
+I am currently completing my mandatory military service in South Korea as technical research personnel (전문연구요원), developing AI for pathology. As part of the R&D team at a company preparing for IPO, my core responsibilities include regulatory submissions to the MFDS (Ministry of Food and Drug Safety) for AI models covering lymph node metastasis in breast cancer, HRD testing in ovarian cancer, and mitosis detection across five cancer types. I am also responsible for all technical patents related to our services and models.
+
+My service ends in June 2028, after which I may continue in my current role as part of a global expansion into markets such as the US, or pursue new opportunities that come my way.
