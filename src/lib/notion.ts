@@ -42,6 +42,7 @@ function slugify(text: string): string {
     text
       .normalize("NFD")
       .replace(/[\u0300-\u036f]/g, "")
+      .normalize("NFC")
       .replace(/[^\w\s가-힣-]/g, "")
       .trim()
       .replace(/[\s_]+/g, "-")
@@ -54,7 +55,8 @@ function pageToPost(page: any, content = ""): BlogPost {
 
   const titleProp = props["title"] ?? Object.values(props).find((p: any) => p?.type === "title");
   const title = extractText(titleProp);
-  const slug = `${page.id.replace(/-/g, "").slice(0, 12)}-${slugify(title)}`;
+  const slugProp = extractText(props["slug"]);
+  const slug = slugProp || `${page.id.replace(/-/g, "").slice(0, 12)}-${slugify(title)}`;
 
   const date =
     props["date"]?.type === "date" && props["date"].date
@@ -108,16 +110,12 @@ export async function getPostBySlug(
 ): Promise<BlogPost | null> {
   const notion = getClient();
 
-  const idPrefix = slug.split("-")[0];
-
-  const response = await notion.databases.query({
+  const filterResponse = await notion.databases.query({
     database_id: DATABASE_ID,
+    filter: { property: "slug", rich_text: { equals: slug } },
   });
 
-  const page = response.results.find((p: any) => {
-    if (!("properties" in p)) return false;
-    return p.id.replace(/-/g, "").startsWith(idPrefix);
-  });
+  const page = filterResponse.results.find((p: any) => "properties" in p);
 
   if (!page || !("properties" in page)) return null;
 
