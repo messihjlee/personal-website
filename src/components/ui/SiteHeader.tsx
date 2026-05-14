@@ -2,11 +2,13 @@
 
 import Link from "next/link";
 import { useState, useRef, useEffect } from "react";
+import { usePathname } from "next/navigation";
 import { ThemeToggle } from "./ThemeToggle";
 
 const NAV = [
   { href: "/",         label: "home"     },
   { href: "/blog",     label: "blog"     },
+  { href: "/about",    label: "about"    },
   { href: "/research", label: "research" },
 ];
 
@@ -18,7 +20,9 @@ const labelStyle: React.CSSProperties = {
 };
 
 export function SiteHeader({ homeLabel = "finding-color" }: { homeLabel?: string }) {
+  const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const navItems = NAV.filter((item) => item.href !== pathname);
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -98,7 +102,7 @@ export function SiteHeader({ homeLabel = "finding-color" }: { homeLabel?: string
                 zIndex: 100,
               }}
             >
-              {NAV.map((item, i) => (
+              {navItems.map((item, i) => (
                 <Link
                   key={item.href}
                   href={item.href}
@@ -106,7 +110,7 @@ export function SiteHeader({ homeLabel = "finding-color" }: { homeLabel?: string
                   style={{
                     display: "block",
                     padding: "10px 16px",
-                    borderBottom: i < NAV.length - 1 ? "1px solid var(--border)" : undefined,
+                    borderBottom: i < navItems.length - 1 ? "1px solid var(--border)" : undefined,
                     ...labelStyle,
                     fontSize: 11,
                   }}
