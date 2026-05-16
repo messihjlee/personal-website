@@ -38,7 +38,7 @@ function PubCard({
         border: "1px solid var(--border)",
         background: "var(--card)",
         cursor: "pointer",
-        textAlign: "center",
+        textAlign: "left",
         fontFamily: "inherit",
         position: "relative",
         overflow: "hidden",
@@ -58,7 +58,7 @@ function PubCard({
             padding: "16px",
             display: "flex",
             alignItems: "center",
-            justifyContent: "center",
+            justifyContent: "flex-start",
           }}
         >
           <p
@@ -67,7 +67,7 @@ function PubCard({
               lineHeight: 1.7,
               color: "rgba(255,255,255,0.85)",
               margin: 0,
-              textAlign: "center",
+              textAlign: "left",
               display: "-webkit-box",
               WebkitLineClamp: 6,
               WebkitBoxOrient: "vertical",
@@ -79,7 +79,7 @@ function PubCard({
         </div>
       )}
 
-      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8, position: "relative" }}>
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 8, position: "relative", width: "100%" }}>
         <div
           className="pub-card-date"
           style={{ letterSpacing: "0.1em", color: "var(--muted)" }}

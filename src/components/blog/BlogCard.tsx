@@ -1,11 +1,18 @@
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
+import { useState } from "react";
 import type { BlogPost } from "@/types";
 
 export function BlogCard({ post }: { post: BlogPost }) {
+  const [hovered, setHovered] = useState(false);
+
   return (
     <Link
       href={`/blog/${post.slug}`}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
       style={{
         display: "block",
         height: "100%",
@@ -22,22 +29,21 @@ export function BlogCard({ post }: { post: BlogPost }) {
             src={post.coverImage}
             alt={post.title}
             fill
-            style={{ objectFit: "cover", opacity: 0.6 }}
+            style={{ objectFit: "cover" }}
             sizes="(max-width: 640px) 100vw, 33vw"
           />
+          {/* Dark mask + text — fades in on hover */}
           <div
             style={{
               position: "absolute",
               inset: 0,
-              background: "linear-gradient(to top, rgba(14,15,17,0.9) 0%, transparent 60%)",
-            }}
-          />
-          <div
-            style={{
-              position: "absolute",
-              bottom: 0,
-              left: 0,
-              right: 0,
+              background: "rgba(20,21,24,0.88)",
+              opacity: hovered ? 1 : 0,
+              transition: "opacity 0.18s ease",
+              pointerEvents: "none",
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "flex-end",
               padding: "12px",
             }}
           >
@@ -45,8 +51,9 @@ export function BlogCard({ post }: { post: BlogPost }) {
               className="grid-card-title blog-card-title"
               style={{
                 letterSpacing: "0.04em",
-                color: "var(--foreground)",
+                color: "rgba(255,255,255,0.95)",
                 lineHeight: 1.4,
+                margin: "0 0 4px",
               }}
             >
               {post.title}
@@ -55,8 +62,8 @@ export function BlogCard({ post }: { post: BlogPost }) {
               className="blog-card-date"
               style={{
                 letterSpacing: "0.08em",
-                color: "var(--muted)",
-                }}
+                color: "rgba(255,255,255,0.55)",
+              }}
             >
               {new Date(post.date).toLocaleDateString("en-US", {
                 year: "numeric",
@@ -66,39 +73,48 @@ export function BlogCard({ post }: { post: BlogPost }) {
           </div>
         </>
       ) : (
-        <div
-          style={{
-            position: "absolute",
-            bottom: 0,
-            left: 0,
-            right: 0,
-            padding: "12px",
-          }}
-        >
-          <p
-            className="grid-card-title"
+        <>
+          {/* No image: show text only on hover */}
+          <div
             style={{
-              fontSize: 15,
-              letterSpacing: "0.04em",
-              color: "var(--foreground)",
-              lineHeight: 1.4,
+              position: "absolute",
+              inset: 0,
+              background: "rgba(20,21,24,0.88)",
+              opacity: hovered ? 1 : 0,
+              transition: "opacity 0.18s ease",
+              pointerEvents: "none",
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "flex-end",
+              padding: "12px",
             }}
           >
-            {post.title}
-          </p>
-          <time
-            style={{
-              fontSize: 12,
-              letterSpacing: "0.08em",
-              color: "var(--muted)",
-            }}
-          >
-            {new Date(post.date).toLocaleDateString("en-US", {
-              year: "numeric",
-              month: "short",
-            })}
-          </time>
-        </div>
+            <p
+              className="grid-card-title"
+              style={{
+                fontSize: 15,
+                letterSpacing: "0.04em",
+                color: "rgba(255,255,255,0.95)",
+                lineHeight: 1.4,
+                margin: "0 0 4px",
+              }}
+            >
+              {post.title}
+            </p>
+            <time
+              style={{
+                fontSize: 12,
+                letterSpacing: "0.08em",
+                color: "rgba(255,255,255,0.55)",
+              }}
+            >
+              {new Date(post.date).toLocaleDateString("en-US", {
+                year: "numeric",
+                month: "short",
+              })}
+            </time>
+          </div>
+        </>
       )}
     </Link>
   );
