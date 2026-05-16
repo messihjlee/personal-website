@@ -30,8 +30,8 @@ function PubCard({
       style={{
         display: "flex",
         flexDirection: "column",
-        justifyContent: "center",
-        alignItems: "center",
+        justifyContent: "flex-end",
+        alignItems: "flex-start",
         width: "100%",
         height: "100%",
         padding: "14px",
