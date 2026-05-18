@@ -80,7 +80,7 @@ export function AboutPanel({ sections }: { sections: Section[] }) {
           style={{
             fontSize: 10,
             letterSpacing: "0.14em",
-            color: "var(--muted)",
+            color: "var(--foreground)",
           }}
         >
           about · {sections[index].title}
@@ -108,6 +108,35 @@ export function AboutPanel({ sections }: { sections: Section[] }) {
           />
         </div>
       </div>
+
+      {isMinimized && (
+        <div
+          style={{
+            padding: "56px 0",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <a
+            href="/found"
+            style={{
+              fontSize: 10,
+              letterSpacing: "0.18em",
+              color: "var(--muted)",
+              background: "none",
+              border: "1px solid var(--border)",
+              padding: "8px 20px",
+              cursor: "pointer",
+              fontFamily: "inherit",
+              textDecoration: "none",
+              display: "inline-block",
+            }}
+          >
+            you&apos;ve found me
+          </a>
+        </div>
+      )}
 
       {!isMinimized && (
         <>

@@ -75,5 +75,5 @@ export async function MdxContent({ source }: { source: string }) {
     },
   });
 
-  return <div className="prose-custom">{content}</div>;
+  return <div className="prose-custom" style={{ color: "var(--foreground)" }}>{content}</div>;
 }
