@@ -1,6 +1,30 @@
 import { compileMDX } from "next-mdx-remote/rsc";
 import rehypePrettyCode from "rehype-pretty-code";
 
+function CVButton({ href }: { href: string }) {
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      style={{
+        display: "inline-block",
+        marginTop: "1rem",
+        fontSize: 10,
+        letterSpacing: "0.14em",
+        color: "var(--foreground)",
+        border: "1px solid var(--border)",
+        padding: "6px 16px",
+        textDecoration: "none",
+        fontFamily: "inherit",
+        cursor: "pointer",
+      }}
+    >
+      cv
+    </a>
+  );
+}
+
 function ColumnImages({ data }: { data: string }) {
   const images: { src: string; alt: string }[] = JSON.parse(
     Buffer.from(data, "base64").toString("utf8")
@@ -22,6 +46,7 @@ function ColumnImages({ data }: { data: string }) {
 
 const components = {
   ColumnImages,
+  CVButton,
   h1: (props: React.ComponentProps<"h1">) => (
     <h1 className="mt-10 mb-4 text-3xl font-bold tracking-tight" {...props} />
   ),
@@ -34,9 +59,16 @@ const components = {
   p: (props: React.ComponentProps<"p">) => (
     <p className="mb-4 leading-relaxed" {...props} />
   ),
-  a: (props: React.ComponentProps<"a">) => (
-    <a className="underline underline-offset-4 hover:text-muted" {...props} />
-  ),
+  a: (props: React.ComponentProps<"a">) => {
+    const isPdf = typeof props.href === "string" && props.href.endsWith(".pdf");
+    return (
+      <a
+        className="underline underline-offset-4 hover:text-muted"
+        {...props}
+        {...(isPdf ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+      />
+    );
+  },
   ul: (props: React.ComponentProps<"ul">) => (
     <ul className="mb-4 list-disc pl-6 space-y-1" {...props} />
   ),
