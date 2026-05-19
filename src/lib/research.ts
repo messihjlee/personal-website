@@ -142,7 +142,7 @@ function toPublication(
 }
 
 export function getResearch(): Publication[] {
-  const bibPath = path.join(process.cwd(), "content", "papers.bib");
+  const bibPath = path.join(process.cwd(), "src", "content", "papers.bib");
   const content = fs.readFileSync(bibPath, "utf-8");
   return parseEntries(content)
     .map(({ type, fields }) => toPublication(type, fields))
