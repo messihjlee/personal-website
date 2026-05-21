@@ -28,7 +28,7 @@ export function BlogSlider({ posts }: { posts: BlogPost[] }) {
       >
         {padded.map((post, i) => (
           <div key={post ? `${post.slug}-${i}` : `empty-${i}`} style={{ minHeight: 0, minWidth: 0 }}>
-            {post && <BlogCard post={post} />}
+            {post && <BlogCard post={post} priority={i < 9} />}
           </div>
         ))}
       </div>

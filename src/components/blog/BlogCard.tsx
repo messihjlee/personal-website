@@ -5,7 +5,7 @@ import Image from "next/image";
 import { useState } from "react";
 import type { BlogPost } from "@/types";
 
-export function BlogCard({ post }: { post: BlogPost }) {
+export function BlogCard({ post, priority }: { post: BlogPost; priority?: boolean }) {
   const [hovered, setHovered] = useState(false);
 
   return (
@@ -31,6 +31,8 @@ export function BlogCard({ post }: { post: BlogPost }) {
             fill
             style={{ objectFit: "cover" }}
             sizes="(max-width: 640px) 100vw, 33vw"
+            loading="eager"
+            priority={priority}
           />
           {/* Dark mask + text — fades in on hover */}
           <div
