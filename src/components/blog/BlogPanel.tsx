@@ -1,0 +1,360 @@
+"use client";
+
+import { useState, useMemo } from "react";
+import Link from "next/link";
+import Image from "next/image";
+import type { BlogPost } from "@/types";
+
+const PAGE_SIZE = 9;
+const CATEGORIES = ["books", "daily", "art", "travel"] as const;
+type Category = (typeof CATEGORIES)[number];
+
+type WinState = "normal" | "minimized" | "fullscreen" | "closed";
+
+function shuffle<T>(arr: T[]): T[] {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+export function BlogPanel({ posts }: { posts: BlogPost[] }) {
+  const shuffled = useMemo(() => shuffle(posts), [posts]);
+  const [category, setCategory] = useState<Category | null>(null);
+  const [index, setIndex] = useState(0);
+  const [win, setWin] = useState<WinState>("normal");
+
+  const items = useMemo(
+    () => (category ? shuffled.filter((p) => p.tags[0] === category) : shuffled),
+    [shuffled, category],
+  );
+
+  const post = items[index] ?? items[0];
+  const isFirst = index === 0;
+  const isLast = index === items.length - 1;
+
+  const currentPage = Math.floor(index / PAGE_SIZE);
+  const pageGroup = items.slice(currentPage * PAGE_SIZE, (currentPage + 1) * PAGE_SIZE);
+
+  function selectCategory(cat: Category) {
+    setCategory((prev) => (prev === cat ? null : cat));
+    setIndex(0);
+  }
+
+  if (win === "closed") {
+    return (
+      <button
+        onClick={() => setWin("normal")}
+        style={{
+          fontSize: 10,
+          letterSpacing: "0.14em",
+          color: "var(--muted)",
+          background: "none",
+          border: "1px solid var(--border)",
+          padding: "6px 14px",
+          cursor: "pointer",
+          fontFamily: "inherit",
+        }}
+      >
+        blog
+      </button>
+    );
+  }
+
+  const isFullscreen = win === "fullscreen";
+  const isMinimized = win === "minimized";
+
+  // Shared inner window markup
+  const windowInner = (
+    <>
+      {/* Title bar */}
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          padding: "9px 14px",
+          borderBottom: isMinimized ? "none" : "1px solid var(--border)",
+          flexShrink: 0,
+          background: "var(--card)",
+          userSelect: "none",
+        }}
+      >
+        <span
+          style={{
+            fontSize: 10,
+            letterSpacing: "0.14em",
+            color: "var(--foreground)",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
+            minWidth: 0,
+            flex: 1,
+            marginRight: 12,
+          }}
+        >
+          blog · {post.title.length > 48 ? post.title.slice(0, 48) + "…" : post.title}
+        </span>
+        <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
+          <button onClick={() => setWin("closed")} aria-label="Close" title="close" style={dotStyle("#ff5f57")} />
+          <button onClick={() => setWin(isMinimized ? "normal" : "minimized")} aria-label="Minimize" title="minimize" style={dotStyle("#f5a623")} />
+          <button onClick={() => setWin(isFullscreen ? "normal" : "fullscreen")} aria-label="Fullscreen" title="fullscreen" style={dotStyle("#27c93f")} />
+        </div>
+      </div>
+
+      {/* In fullscreen mode, show category filter as a flat row below the title bar */}
+      {isFullscreen && !isMinimized && (
+        <div
+          style={{
+            display: "flex",
+            gap: 6,
+            padding: "8px 14px",
+            borderBottom: "1px solid var(--border)",
+            flexShrink: 0,
+            background: "var(--card)",
+            flexWrap: "wrap",
+          }}
+        >
+          {CATEGORIES.map((cat) => (
+            <button
+              key={cat}
+              onClick={() => selectCategory(cat)}
+              style={{
+                fontSize: 10,
+                letterSpacing: "0.12em",
+                color: category === cat ? "var(--foreground)" : "var(--muted)",
+                background: "none",
+                border: `1px solid ${category === cat ? "var(--foreground)" : "var(--border)"}`,
+                padding: "3px 10px",
+                cursor: "pointer",
+                fontFamily: "inherit",
+              }}
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {isMinimized && (
+        <div style={{ padding: "56px 0", display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <button
+            onClick={() => setWin("normal")}
+            style={{
+              fontSize: 10,
+              letterSpacing: "0.18em",
+              color: "var(--muted)",
+              background: "none",
+              border: "1px solid var(--border)",
+              padding: "8px 20px",
+              cursor: "pointer",
+              fontFamily: "inherit",
+            }}
+          >
+            show
+          </button>
+        </div>
+      )}
+
+      {/* Preload cover images for the current group of 9 */}
+      <div aria-hidden="true" style={{ position: "fixed", top: -9999, left: -9999, width: 680, pointerEvents: "none" }}>
+        {pageGroup.filter((p) => p.coverImage && p.slug !== post?.slug).map((p) => (
+          <div key={p.slug} style={{ position: "relative", height: 300 }}>
+            <Image src={p.coverImage} alt="" fill sizes="680px" />
+          </div>
+        ))}
+      </div>
+
+      {!isMinimized && (
+        <>
+          <div style={{ flex: 1, overflowY: "auto", display: "flex", flexDirection: "column" }}>
+            {post.coverImage && (
+              <div style={{ position: "relative", width: "100%", aspectRatio: "16/7", flexShrink: 0 }}>
+                <Image
+                  src={post.coverImage}
+                  alt={post.title}
+                  fill
+                  style={{ objectFit: "cover" }}
+                  sizes="(max-width: 680px) 100vw, 680px"
+                  priority
+                />
+              </div>
+            )}
+            <div style={{ padding: "28px 28px 24px", display: "flex", flexDirection: "column", gap: 12 }}>
+              <time style={{ fontSize: 10, letterSpacing: "0.12em", color: "var(--muted)" }}>
+                {new Date(post.date).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}
+              </time>
+              <h2
+                style={{
+                  fontSize: 20,
+                  fontWeight: 600,
+                  lineHeight: 1.35,
+                  color: "var(--foreground)",
+                  margin: 0,
+                  fontFamily: "inherit",
+                }}
+              >
+                {post.title}
+              </h2>
+              {post.description && (
+                <p style={{ fontSize: 14, lineHeight: 1.75, color: "var(--muted)", margin: 0 }}>
+                  {post.description}
+                </p>
+              )}
+              <Link
+                href={`/blog/${post.slug}`}
+                style={{
+                  fontSize: 10,
+                  letterSpacing: "0.14em",
+                  color: "var(--foreground)",
+                  textDecoration: "none",
+                  border: "1px solid var(--border)",
+                  padding: "6px 14px",
+                  alignSelf: "flex-start",
+                  marginTop: 4,
+                }}
+              >
+                read →
+              </Link>
+            </div>
+          </div>
+
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              padding: "9px 14px",
+              borderTop: "1px solid var(--border)",
+              flexShrink: 0,
+              background: "var(--card)",
+            }}
+          >
+            <button onClick={() => setIndex((i) => Math.max(0, i - 1))} disabled={isFirst} style={navBtnStyle(isFirst)}>
+              ← prev
+            </button>
+            <span style={{ fontSize: 10, letterSpacing: "0.12em", color: "var(--muted)" }}>
+              {index + 1} / {items.length}
+            </span>
+            <button onClick={() => setIndex((i) => Math.min(items.length - 1, i + 1))} disabled={isLast} style={navBtnStyle(isLast)}>
+              next →
+            </button>
+          </div>
+        </>
+      )}
+    </>
+  );
+
+  // Fullscreen: window covers the viewport, no outer wrapper needed
+  if (isFullscreen) {
+    return (
+      <div
+        style={{
+          position: "fixed",
+          top: 37,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          display: "flex",
+          flexDirection: "column",
+          background: "var(--background)",
+          border: "1px solid var(--border)",
+          zIndex: 50,
+        }}
+      >
+        {windowInner}
+      </div>
+    );
+  }
+
+  // Normal / minimized: trapezoid tabs sit above the box
+  return (
+    <div style={{ width: "100%", maxWidth: 680 }}>
+      {/* Trapezoid category tabs — straight left edge, diagonal right edge */}
+      <div style={{ display: "flex", alignItems: "flex-end", gap: 2 }}>
+        {CATEGORIES.map((cat) => {
+          const isActive = category === cat;
+          return (
+            <div
+              key={cat}
+              style={{
+                // outer shape: straight left, diagonal right (narrows toward top-right)
+                clipPath: "polygon(0% 0%, calc(100% - 14px) 0%, 100% 100%, 0% 100%)",
+                background: "var(--border)",
+                position: "relative",
+                zIndex: isActive ? 1 : 0,
+                marginBottom: "-1px",
+              }}
+            >
+              <button
+                onClick={() => selectCategory(cat)}
+                style={{
+                  display: "block",
+                  // inner shape: inset 1px on left, top, and diagonal right → border color peeks through
+                  // bottom extends past 100% so no bottom border shows
+                  clipPath: "polygon(1px 1px, calc(100% - 15px) 1px, calc(100% - 1px) 100%, 1px 100%)",
+                  background: isActive ? "var(--card)" : "var(--background)",
+                  color: "var(--foreground)",
+                  padding: "5px 28px 6px 14px",
+                  fontSize: 10,
+                  letterSpacing: "0.12em",
+                  fontFamily: "inherit",
+                  border: "none",
+                  cursor: "pointer",
+                  whiteSpace: "nowrap",
+                  width: "100%",
+                }}
+              >
+                {cat}
+              </button>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Window box */}
+      <div
+        style={{
+          width: "100%",
+          maxHeight: "calc(100svh - 36px - 48px)",
+          display: "flex",
+          flexDirection: "column",
+          border: "1px solid var(--border)",
+          background: "var(--background)",
+          position: "relative",
+          zIndex: 0,
+        }}
+      >
+        {windowInner}
+      </div>
+    </div>
+  );
+}
+
+function dotStyle(color: string): React.CSSProperties {
+  return {
+    width: 12,
+    height: 12,
+    borderRadius: "50%",
+    background: color,
+    border: "none",
+    cursor: "pointer",
+    padding: 0,
+    flexShrink: 0,
+  };
+}
+
+function navBtnStyle(disabled: boolean): React.CSSProperties {
+  return {
+    fontSize: 10,
+    letterSpacing: "0.12em",
+    color: disabled ? "var(--muted)" : "var(--foreground)",
+    background: "none",
+    border: "1px solid var(--border)",
+    padding: "4px 12px",
+    cursor: disabled ? "default" : "pointer",
+    fontFamily: "inherit",
+  };
+}

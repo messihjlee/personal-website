@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { ResearchGrid } from "@/components/research/ResearchGrid";
+import { ResearchPanel } from "@/components/research/ResearchPanel";
 import { getResearch } from "@/lib/research";
 
 export const metadata: Metadata = {
@@ -18,14 +18,16 @@ export default function ResearchPage() {
       }}
     >
       <div
-        className="page-grid-wrap"
         style={{
           borderTop: "1px solid var(--border)",
-          height: "calc(100svh - 36px)",
+          minHeight: "calc(100svh - 36px)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
           padding: "24px 16px",
         }}
       >
-        <ResearchGrid publications={publications} />
+        <ResearchPanel publications={publications} />
       </div>
     </div>
   );

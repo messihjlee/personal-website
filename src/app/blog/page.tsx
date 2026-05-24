@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { getAllPosts } from "@/lib/notion";
-import { BlogSlider } from "@/components/blog/BlogSlider";
+import { BlogPanel } from "@/components/blog/BlogPanel";
 
 export const revalidate = 60;
 
@@ -20,14 +20,16 @@ export default async function BlogPage() {
       }}
     >
       <div
-        className="page-grid-wrap"
         style={{
           borderTop: "1px solid var(--border)",
-          height: "calc(100svh - 36px)",
+          minHeight: "calc(100svh - 36px)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
           padding: "24px 16px",
         }}
       >
-        <BlogSlider posts={posts} />
+        <BlogPanel posts={posts} />
       </div>
     </div>
   );
