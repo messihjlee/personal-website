@@ -1,4 +1,4 @@
-import { redis } from "@/lib/redis";
+import { getRedis } from "@/lib/redis";
 
 const PAGES = ["home", "about", "research", "blog", "contact"];
 
@@ -22,7 +22,8 @@ const DUMMY = {
 };
 
 export async function GET() {
-  if (!process.env.UPSTASH_REDIS_REST_URL) {
+  const redis = getRedis();
+  if (!redis) {
     return Response.json(DUMMY);
   }
 

@@ -5,38 +5,30 @@ import Link from "next/link";
 import Image from "next/image";
 import type { BlogPost } from "@/types";
 
-const PAGE_SIZE = 9;
 const CATEGORIES = ["books", "daily", "art", "travel"] as const;
 type Category = (typeof CATEGORIES)[number];
 
 type WinState = "normal" | "minimized" | "fullscreen" | "closed";
 
-function shuffle<T>(arr: T[]): T[] {
-  const a = [...arr];
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
-}
-
 export function BlogPanel({ posts }: { posts: BlogPost[] }) {
-  const shuffled = useMemo(() => shuffle(posts), [posts]);
   const [category, setCategory] = useState<Category | null>(null);
   const [index, setIndex] = useState(0);
   const [win, setWin] = useState<WinState>("normal");
 
   const items = useMemo(
-    () => (category ? shuffled.filter((p) => p.tags[0] === category) : shuffled),
-    [shuffled, category],
+    () => (category ? posts.filter((p) => p.tags[0] === category) : posts),
+    [posts, category],
   );
 
   const post = items[index] ?? items[0];
   const isFirst = index === 0;
   const isLast = index === items.length - 1;
 
-  const currentPage = Math.floor(index / PAGE_SIZE);
-  const pageGroup = items.slice(currentPage * PAGE_SIZE, (currentPage + 1) * PAGE_SIZE);
+  // First post per category — preload their cover images so tab switches are instant
+  const categoryLeaders = useMemo(
+    () => CATEGORIES.map((cat) => posts.find((p) => p.tags[0] === cat)).filter(Boolean) as BlogPost[],
+    [posts],
+  );
 
   function selectCategory(cat: Category) {
     setCategory((prev) => (prev === cat ? null : cat));
@@ -158,11 +150,11 @@ export function BlogPanel({ posts }: { posts: BlogPost[] }) {
         </div>
       )}
 
-      {/* Preload cover images for the current group of 9 */}
+      {/* Preload the first post per category so switching tabs is instant */}
       <div aria-hidden="true" style={{ position: "fixed", top: -9999, left: -9999, width: 680, pointerEvents: "none" }}>
-        {pageGroup.filter((p) => p.coverImage && p.slug !== post?.slug).map((p) => (
+        {categoryLeaders.filter((p) => p.coverImage && p.slug !== post?.slug).map((p) => (
           <div key={p.slug} style={{ position: "relative", height: 300 }}>
-            <Image src={p.coverImage} alt="" fill sizes="680px" />
+            <Image src={p.coverImage!} alt="" fill sizes="680px" />
           </div>
         ))}
       </div>

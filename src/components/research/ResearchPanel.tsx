@@ -151,7 +151,7 @@ export function ResearchPanel({ publications }: { publications: Publication[] })
             </p>
             <div style={{ height: 1, background: "var(--border)", flexShrink: 0 }} />
             {pub.abstract && (
-              <p style={{ fontSize: 13, lineHeight: 1.8, color: "var(--muted)", margin: 0 }}>
+              <p style={{ fontSize: 13, lineHeight: 1.8, color: "var(--foreground)", margin: 0 }}>
                 {pub.abstract}
               </p>
             )}

@@ -1,10 +1,13 @@
-import { redis } from "@/lib/redis";
+import { getRedis } from "@/lib/redis";
 import { NextResponse } from "next/server";
 
 const PAGES = new Set(["home", "about", "research", "blog", "contact"]);
 
 export async function POST(req: Request) {
   try {
+    const redis = getRedis();
+    if (!redis) return new NextResponse("ok");
+
     const { sessionId, page, prevPage } = (await req.json()) as {
       sessionId: string;
       page: string;
