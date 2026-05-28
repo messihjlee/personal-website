@@ -1,6 +1,10 @@
 import { Client } from "@notionhq/client";
 import { NotionToMarkdown } from "notion-to-md";
 import type { BlogPost } from "@/types";
+import { getRedis } from "@/lib/redis";
+
+const POSTS_CACHE_KEY = "blog:all_posts";
+const POSTS_CACHE_TTL = 300; // 5 minutes
 
 let client: Client | null = null;
 
@@ -84,7 +88,7 @@ function pageToPost(page: any, content = ""): BlogPost {
   };
 }
 
-export async function getAllPosts(): Promise<BlogPost[]> {
+async function fetchAllPostsFromNotion(): Promise<BlogPost[]> {
   const notion = getClient();
 
   const allResults: any[] = [];
@@ -103,6 +107,23 @@ export async function getAllPosts(): Promise<BlogPost[]> {
   return allResults
     .filter((p: any) => "properties" in p)
     .map((page: any) => pageToPost(page));
+}
+
+export async function getAllPosts(): Promise<BlogPost[]> {
+  const redis = getRedis();
+
+  if (redis) {
+    const cached = await redis.get<BlogPost[]>(POSTS_CACHE_KEY);
+    if (cached) return cached;
+  }
+
+  const posts = await fetchAllPostsFromNotion();
+
+  if (redis) {
+    await redis.set(POSTS_CACHE_KEY, posts, { ex: POSTS_CACHE_TTL });
+  }
+
+  return posts;
 }
 
 export async function getPostBySlug(

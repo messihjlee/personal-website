@@ -154,7 +154,7 @@ export function BlogPanel({ posts }: { posts: BlogPost[] }) {
       <div aria-hidden="true" style={{ position: "fixed", top: -9999, left: -9999, width: 680, pointerEvents: "none" }}>
         {categoryLeaders.filter((p) => p.coverImage && p.slug !== post?.slug).map((p) => (
           <div key={p.slug} style={{ position: "relative", height: 300 }}>
-            <Image src={p.coverImage!} alt="" fill sizes="680px" />
+            <Image src={p.coverImage!} alt="" fill sizes="(max-width: 680px) 100vw, 680px" priority />
           </div>
         ))}
       </div>
