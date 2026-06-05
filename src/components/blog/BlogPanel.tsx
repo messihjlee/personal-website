@@ -1,19 +1,37 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import Link from "next/link";
 import Image from "next/image";
 import type { BlogPost } from "@/types";
+import { useDraggable } from "@/hooks/useDraggable";
 
 const CATEGORIES = ["books", "daily", "art", "travel"] as const;
 type Category = (typeof CATEGORIES)[number];
 
 type WinState = "normal" | "minimized" | "fullscreen" | "closed";
 
-export function BlogPanel({ posts }: { posts: BlogPost[] }) {
+export function BlogPanel({
+  posts,
+  onOpen,
+  windowIndex = 0,
+}: {
+  posts: BlogPost[];
+  onOpen?: (slug: string) => void;
+  windowIndex?: number;
+}) {
   const [category, setCategory] = useState<Category | null>(null);
   const [index, setIndex] = useState(0);
   const [win, setWin] = useState<WinState>("normal");
+
+  const { pos, onMouseDown, onTouchStart } = useDraggable(() => {
+    const vw = window.innerWidth;
+    const isMobile = vw < 720;
+    if (isMobile) return { x: 16, y: 44 };
+    return {
+      x: Math.max(20, (vw - 680) / 2 + windowIndex * 30),
+      y: Math.max(44, 80 + windowIndex * 24),
+    };
+  });
 
   const items = useMemo(
     () => (category ? posts.filter((p) => p.tags[0] === category) : posts),
@@ -24,7 +42,6 @@ export function BlogPanel({ posts }: { posts: BlogPost[] }) {
   const isFirst = index === 0;
   const isLast = index === items.length - 1;
 
-  // First post per category — preload their cover images so tab switches are instant
   const categoryLeaders = useMemo(
     () => CATEGORIES.map((cat) => posts.find((p) => p.tags[0] === cat)).filter(Boolean) as BlogPost[],
     [posts],
@@ -35,11 +52,17 @@ export function BlogPanel({ posts }: { posts: BlogPost[] }) {
     setIndex(0);
   }
 
+  // Don't render until position is ready (avoids flash at 0,0)
+  if (!pos) return null;
+
   if (win === "closed") {
     return (
       <button
         onClick={() => setWin("normal")}
         style={{
+          position: "fixed",
+          left: pos.x,
+          top: pos.y,
           fontSize: 10,
           letterSpacing: "0.14em",
           color: "var(--muted)",
@@ -48,6 +71,7 @@ export function BlogPanel({ posts }: { posts: BlogPost[] }) {
           padding: "6px 14px",
           cursor: "pointer",
           fontFamily: "inherit",
+          zIndex: 10,
         }}
       >
         blog
@@ -58,45 +82,48 @@ export function BlogPanel({ posts }: { posts: BlogPost[] }) {
   const isFullscreen = win === "fullscreen";
   const isMinimized = win === "minimized";
 
-  // Shared inner window markup
-  const windowInner = (
-    <>
-      {/* Title bar */}
-      <div
+  const titleBar = (
+    <div
+      onMouseDown={isFullscreen ? undefined : onMouseDown}
+      onTouchStart={isFullscreen ? undefined : onTouchStart}
+      style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        padding: "9px 14px",
+        borderBottom: isMinimized ? "none" : "1px solid var(--border)",
+        flexShrink: 0,
+        background: "var(--card)",
+        userSelect: "none",
+        cursor: isFullscreen ? "default" : "grab",
+      }}
+    >
+      <span
         style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          padding: "9px 14px",
-          borderBottom: isMinimized ? "none" : "1px solid var(--border)",
-          flexShrink: 0,
-          background: "var(--card)",
-          userSelect: "none",
+          fontSize: 10,
+          letterSpacing: "0.14em",
+          color: "var(--foreground)",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+          whiteSpace: "nowrap",
+          minWidth: 0,
+          flex: 1,
+          marginRight: 12,
         }}
       >
-        <span
-          style={{
-            fontSize: 10,
-            letterSpacing: "0.14em",
-            color: "var(--foreground)",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            whiteSpace: "nowrap",
-            minWidth: 0,
-            flex: 1,
-            marginRight: 12,
-          }}
-        >
-          blog · {post.title.length > 48 ? post.title.slice(0, 48) + "…" : post.title}
-        </span>
-        <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
-          <button onClick={() => setWin("closed")} aria-label="Close" title="close" style={dotStyle("#ff5f57")} />
-          <button onClick={() => setWin(isMinimized ? "normal" : "minimized")} aria-label="Minimize" title="minimize" style={dotStyle("#f5a623")} />
-          <button onClick={() => setWin(isFullscreen ? "normal" : "fullscreen")} aria-label="Fullscreen" title="fullscreen" style={dotStyle("#27c93f")} />
-        </div>
+        blog · {post.title.length > 48 ? post.title.slice(0, 48) + "…" : post.title}
+      </span>
+      <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
+        <button onClick={() => setWin("closed")} aria-label="Close" title="close" style={dotStyle("#ff5f57")} />
+        <button onClick={() => setWin(isMinimized ? "normal" : "minimized")} aria-label="Minimize" title="minimize" style={dotStyle("#f5a623")} />
+        <button onClick={() => setWin(isFullscreen ? "normal" : "fullscreen")} aria-label="Fullscreen" title="fullscreen" style={dotStyle("#27c93f")} />
       </div>
+    </div>
+  );
 
-      {/* In fullscreen mode, show category filter as a flat row below the title bar */}
+  const windowBody = (
+    <>
+      {/* Fullscreen category filter row */}
       {isFullscreen && !isMinimized && (
         <div
           style={{
@@ -150,7 +177,7 @@ export function BlogPanel({ posts }: { posts: BlogPost[] }) {
         </div>
       )}
 
-      {/* Preload the first post per category so switching tabs is instant */}
+      {/* Preload category leader images */}
       <div aria-hidden="true" style={{ position: "fixed", top: -9999, left: -9999, width: 680, pointerEvents: "none" }}>
         {categoryLeaders.filter((p) => p.coverImage && p.slug !== post?.slug).map((p) => (
           <div key={p.slug} style={{ position: "relative", height: 300 }}>
@@ -195,21 +222,23 @@ export function BlogPanel({ posts }: { posts: BlogPost[] }) {
                   {post.description}
                 </p>
               )}
-              <Link
-                href={`/blog/${post.slug}`}
+              <button
+                onClick={() => onOpen?.(post.slug)}
                 style={{
                   fontSize: 10,
                   letterSpacing: "0.14em",
                   color: "var(--foreground)",
-                  textDecoration: "none",
+                  background: "none",
                   border: "1px solid var(--border)",
                   padding: "6px 14px",
                   alignSelf: "flex-start",
                   marginTop: 4,
+                  cursor: "pointer",
+                  fontFamily: "inherit",
                 }}
               >
                 read →
-              </Link>
+              </button>
             </div>
           </div>
 
@@ -239,7 +268,6 @@ export function BlogPanel({ posts }: { posts: BlogPost[] }) {
     </>
   );
 
-  // Fullscreen: window covers the viewport, no outer wrapper needed
   if (isFullscreen) {
     return (
       <div
@@ -256,15 +284,26 @@ export function BlogPanel({ posts }: { posts: BlogPost[] }) {
           zIndex: 50,
         }}
       >
-        {windowInner}
+        {titleBar}
+        {windowBody}
       </div>
     );
   }
 
-  // Normal / minimized: trapezoid tabs sit above the box
+  // Normal / minimized — draggable fixed window with category tabs above
   return (
-    <div style={{ width: "100%", maxWidth: 680 }}>
-      {/* Trapezoid category tabs — straight left edge, diagonal right edge */}
+    <div
+      style={{
+        position: "fixed",
+        left: pos.x,
+        top: pos.y,
+        width: "min(680px, calc(100vw - 32px))",
+        display: "flex",
+        flexDirection: "column",
+        zIndex: 10,
+      }}
+    >
+      {/* Trapezoid category tabs */}
       <div style={{ display: "flex", alignItems: "flex-end", gap: 2 }}>
         {CATEGORIES.map((cat) => {
           const isActive = category === cat;
@@ -272,7 +311,6 @@ export function BlogPanel({ posts }: { posts: BlogPost[] }) {
             <div
               key={cat}
               style={{
-                // outer shape: straight left, diagonal right (narrows toward top-right)
                 clipPath: "polygon(0% 0%, calc(100% - 14px) 0%, 100% 100%, 0% 100%)",
                 background: "var(--border)",
                 position: "relative",
@@ -284,8 +322,6 @@ export function BlogPanel({ posts }: { posts: BlogPost[] }) {
                 onClick={() => selectCategory(cat)}
                 style={{
                   display: "block",
-                  // inner shape: inset 1px on left, top, and diagonal right → border color peeks through
-                  // bottom extends past 100% so no bottom border shows
                   clipPath: "polygon(1px 1px, calc(100% - 15px) 1px, calc(100% - 1px) 100%, 1px 100%)",
                   background: isActive ? "var(--card)" : "var(--background)",
                   color: "var(--foreground)",
@@ -309,17 +345,15 @@ export function BlogPanel({ posts }: { posts: BlogPost[] }) {
       {/* Window box */}
       <div
         style={{
-          width: "100%",
           maxHeight: "calc(100svh - 36px - 48px)",
           display: "flex",
           flexDirection: "column",
           border: "1px solid var(--border)",
           background: "var(--background)",
-          position: "relative",
-          zIndex: 0,
         }}
       >
-        {windowInner}
+        {titleBar}
+        {windowBody}
       </div>
     </div>
   );

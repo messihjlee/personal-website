@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { getAllPosts } from "@/lib/notion";
-import { BlogPanel } from "@/components/blog/BlogPanel";
+import { BlogDesktop } from "@/components/blog/BlogDesktop";
 
 export const revalidate = 300;
 
@@ -23,13 +23,9 @@ export default async function BlogPage() {
         style={{
           borderTop: "1px solid var(--border)",
           minHeight: "calc(100svh - 36px)",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          padding: "24px 16px",
         }}
       >
-        <BlogPanel posts={posts} />
+        <BlogDesktop posts={posts} />
       </div>
     </div>
   );
