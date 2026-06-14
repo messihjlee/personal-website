@@ -14,7 +14,7 @@ interface ArticleData {
   mdxSource: MDXRemoteSerializeResult;
 }
 
-type WinState = "normal" | "minimized" | "fullscreen" | "closed";
+type WinState = "normal" | "fullscreen" | "closed";
 
 const mdxComponents = {
   ColumnImages: ({ data }: { data: string }) => {
@@ -92,10 +92,16 @@ const TAG_COLORS: Record<string, { bg: string; color: string }> = {
 export function BlogArticleWindow({
   slug,
   onClose,
+  onMinimize,
+  onTitleLoaded,
+  minimized = false,
   windowIndex = 1,
 }: {
   slug: string;
   onClose: () => void;
+  onMinimize: () => void;
+  onTitleLoaded?: (title: string) => void;
+  minimized?: boolean;
   windowIndex?: number;
 }) {
   const [article, setArticle] = useState<ArticleData | null>(null);
@@ -115,11 +121,17 @@ export function BlogArticleWindow({
   useEffect(() => {
     fetch(`/api/blog/${slug}`)
       .then((r) => r.json())
-      .then((data: ArticleData) => { setArticle(data); setLoading(false); })
+      .then((data: ArticleData) => {
+        setArticle(data);
+        setLoading(false);
+        onTitleLoaded?.(data.title);
+      })
       .catch(() => setLoading(false));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [slug]);
 
   if (!pos) return null;
+  if (minimized) return null;
 
   const shortTitle = article
     ? article.title.length > 48 ? article.title.slice(0, 48) + "…" : article.title
@@ -144,7 +156,6 @@ export function BlogArticleWindow({
   }
 
   const isFullscreen = win === "fullscreen";
-  const isMinimized = win === "minimized";
 
   const titleBar = (
     <div
@@ -152,9 +163,10 @@ export function BlogArticleWindow({
       onTouchStart={isFullscreen ? undefined : onTouchStart}
       style={{
         display: "flex", alignItems: "center", justifyContent: "space-between",
-        padding: "9px 14px", borderBottom: isMinimized ? "none" : "1px solid var(--border)",
+        padding: "9px 14px", borderBottom: "1px solid var(--border)",
         flexShrink: 0, background: "var(--card)", userSelect: "none",
         cursor: isFullscreen ? "default" : "grab",
+        touchAction: "none",
       }}
     >
       <span
@@ -168,7 +180,7 @@ export function BlogArticleWindow({
       </span>
       <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
         <button onClick={onClose} aria-label="Close" title="close" style={dotStyle("#ff5f57")} />
-        <button onClick={() => setWin(isMinimized ? "normal" : "minimized")} aria-label="Minimize" title="minimize" style={dotStyle("#f5a623")} />
+        <button onClick={onMinimize} aria-label="Minimize" title="minimize" style={dotStyle("#f5a623")} />
         <button onClick={() => setWin(isFullscreen ? "normal" : "fullscreen")} aria-label="Fullscreen" title="fullscreen" style={dotStyle("#27c93f")} />
       </div>
     </div>
@@ -177,6 +189,7 @@ export function BlogArticleWindow({
   if (isFullscreen) {
     return (
       <div
+        className="window-restore"
         style={{
           position: "fixed", top: 37, left: 0, right: 0, bottom: 0,
           display: "flex", flexDirection: "column", background: "var(--background)",
@@ -184,13 +197,14 @@ export function BlogArticleWindow({
         }}
       >
         {titleBar}
-        {articleBody(article, loading, isMinimized, win, setWin)}
+        {articleBody(article, loading, win, setWin)}
       </div>
     );
   }
 
   return (
     <div
+      className="window-restore"
       style={{
         position: "fixed",
         left: pos.x,
@@ -205,7 +219,7 @@ export function BlogArticleWindow({
       }}
     >
       {titleBar}
-      {articleBody(article, loading, isMinimized, win, setWin)}
+      {articleBody(article, loading, win, setWin)}
     </div>
   );
 }
@@ -213,26 +227,9 @@ export function BlogArticleWindow({
 function articleBody(
   article: ArticleData | null,
   loading: boolean,
-  isMinimized: boolean,
   win: WinState,
   setWin: (w: WinState) => void,
 ) {
-  if (isMinimized) {
-    return (
-      <div style={{ padding: "56px 0", display: "flex", alignItems: "center", justifyContent: "center" }}>
-        <button
-          onClick={() => setWin("normal")}
-          style={{
-            fontSize: 10, letterSpacing: "0.18em", color: "var(--muted)", background: "none",
-            border: "1px solid var(--border)", padding: "8px 20px", cursor: "pointer", fontFamily: "inherit",
-          }}
-        >
-          show
-        </button>
-      </div>
-    );
-  }
-
   if (loading) {
     return (
       <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: 48 }}>

@@ -46,6 +46,7 @@ export function useDraggable(getInitialPos: () => Position) {
     const { x: startWX, y: startWY } = posRef.current;
 
     function onMove(ev: TouchEvent) {
+      ev.preventDefault();
       const t = ev.touches[0];
       setPos({
         x: startWX + (t.clientX - startMX),
@@ -56,7 +57,7 @@ export function useDraggable(getInitialPos: () => Position) {
       window.removeEventListener("touchmove", onMove);
       window.removeEventListener("touchend", onEnd);
     }
-    window.addEventListener("touchmove", onMove, { passive: true });
+    window.addEventListener("touchmove", onMove, { passive: false });
     window.addEventListener("touchend", onEnd);
   }, []);
 
