@@ -114,7 +114,7 @@ export function BlogArticleWindow({
     const isMobile = vw < 720;
     if (isMobile) return { x: 16, y: 44 + windowIndex * 32 };
     const winW = Math.min(680, vw - 32);
-    const winH = vh - 36 - 48;
+    const winH = Math.min(680, vh - 84);
     return {
       x: Math.max(20, (vw - winW) / 2 + windowIndex * 30),
       y: Math.max(44, (vh - winH) / 2 + windowIndex * 24),
@@ -213,7 +213,7 @@ export function BlogArticleWindow({
         left: pos.x,
         top: pos.y,
         width: "min(680px, calc(100vw - 32px))",
-        maxHeight: "calc(100svh - 36px - 48px)",
+        height: "min(680px, calc(100svh - 84px))",
         display: "flex",
         flexDirection: "column",
         border: "1px solid var(--border)",
