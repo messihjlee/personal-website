@@ -69,7 +69,7 @@ const mdxComponents = {
     <hr style={{ margin: "1.5rem 0", borderColor: "var(--border)" }} {...props} />
   ),
   blockquote: (props: React.ComponentProps<"blockquote">) => (
-    <blockquote style={{ borderLeft: "2px solid var(--border)", paddingLeft: "1rem", margin: "1.5rem 0", fontStyle: "italic", color: "var(--muted)" }} {...props} />
+    <blockquote style={{ borderLeft: "2px solid var(--border)", paddingLeft: "1rem", margin: "1.5rem 0", fontStyle: "italic", color: "var(--foreground)", fontWeight: 600 }} {...props} />
   ),
   code: (props: React.ComponentProps<"code">) => (
     <code style={{ background: "var(--card)", padding: "2px 6px", fontSize: "0.875em" }} {...props} />
@@ -83,11 +83,6 @@ const mdxComponents = {
   ),
 };
 
-const TAG_COLORS: Record<string, { bg: string; color: string }> = {
-  books:  { bg: "#1a2a1a", color: "#4caf6e" },
-  art:    { bg: "#2a1e12", color: "#c97d3a" },
-  travel: { bg: "#111e2a", color: "#3a88c9" },
-};
 
 export function BlogArticleWindow({
   slug,
@@ -112,12 +107,11 @@ export function BlogArticleWindow({
     const vw = window.innerWidth;
     const vh = window.innerHeight;
     const isMobile = vw < 720;
-    if (isMobile) return { x: 16, y: 44 + windowIndex * 32 };
     const winW = Math.min(680, vw - 32);
     const winH = Math.min(680, vh - 84);
     return {
-      x: Math.max(20, (vw - winW) / 2 + windowIndex * 30),
-      y: Math.max(44, (vh - winH) / 2 + windowIndex * 24),
+      x: Math.max(isMobile ? 16 : 20, (vw - winW) / 2 + windowIndex * (isMobile ? 16 : 30)),
+      y: Math.max(44, (vh - winH) / 2 + windowIndex * (isMobile ? 20 : 24)),
     };
   });
 
@@ -279,21 +273,18 @@ function articleBody(
           </time>
           {article.tags.length > 0 && (
             <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-              {article.tags.map((tag) => {
-                const c = TAG_COLORS[tag] ?? { bg: "#1a1c22", color: "#616978" };
-                return (
-                  <span
-                    key={tag}
-                    style={{
-                      background: c.bg, color: c.color, fontSize: 10,
-                      letterSpacing: "0.12em", padding: "4px 10px",
-                      border: `1px solid ${c.color}30`,
-                    }}
-                  >
-                    {tag}
-                  </span>
-                );
-              })}
+              {article.tags.map((tag) => (
+                <span
+                  key={tag}
+                  style={{
+                    background: "none", color: "var(--muted)", fontSize: 10,
+                    letterSpacing: "0.14em", padding: "4px 10px",
+                    border: "1px solid var(--border)",
+                  }}
+                >
+                  {tag}
+                </span>
+              ))}
             </div>
           )}
         </header>

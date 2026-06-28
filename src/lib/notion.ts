@@ -97,6 +97,7 @@ async function fetchAllPostsFromNotion(): Promise<BlogPost[]> {
   do {
     const response = await notion.databases.query({
       database_id: DATABASE_ID,
+      filter: { property: "ready", checkbox: { equals: true } },
       sorts: [{ property: "date", direction: "descending" }],
       ...(cursor ? { start_cursor: cursor } : {}),
     });
@@ -208,6 +209,7 @@ export async function getAllSlugs(): Promise<string[]> {
 
   const response = await notion.databases.query({
     database_id: DATABASE_ID,
+    filter: { property: "ready", checkbox: { equals: true } },
     sorts: [{ property: "date", direction: "descending" }],
   });
 

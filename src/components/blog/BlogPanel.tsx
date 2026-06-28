@@ -25,11 +25,14 @@ export function BlogPanel({
 
   const { pos, onMouseDown, onTouchStart } = useDraggable(() => {
     const vw = window.innerWidth;
+    const vh = window.innerHeight;
     const isMobile = vw < 720;
-    if (isMobile) return { x: 16, y: 44 };
+    const winW = Math.min(680, vw - 32);
+    const tabsH = 30;
+    const boxH = Math.min(560, vh - 84);
     return {
-      x: Math.max(20, (vw - 680) / 2 + windowIndex * 30),
-      y: Math.max(44, 80 + windowIndex * 24),
+      x: Math.max(isMobile ? 16 : 20, (vw - winW) / 2 + windowIndex * (isMobile ? 16 : 30)),
+      y: Math.max(44, (vh - boxH - tabsH) / 2 + windowIndex * (isMobile ? 20 : 24)),
     };
   });
 
@@ -345,7 +348,7 @@ export function BlogPanel({
       {/* Window box */}
       <div
         style={{
-          maxHeight: "calc(100svh - 36px - 48px)",
+          height: "min(560px, calc(100svh - 84px))",
           display: "flex",
           flexDirection: "column",
           border: "1px solid var(--border)",
