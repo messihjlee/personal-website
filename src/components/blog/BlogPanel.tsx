@@ -3,7 +3,6 @@
 import { useState, useMemo } from "react";
 import Image from "next/image";
 import type { BlogPost } from "@/types";
-import { useDraggable } from "@/hooks/useDraggable";
 
 const CATEGORIES = ["books", "daily", "art", "travel"] as const;
 type Category = (typeof CATEGORIES)[number];
@@ -13,28 +12,13 @@ type WinState = "normal" | "minimized" | "fullscreen" | "closed";
 export function BlogPanel({
   posts,
   onOpen,
-  windowIndex = 0,
 }: {
   posts: BlogPost[];
   onOpen?: (slug: string) => void;
-  windowIndex?: number;
 }) {
   const [category, setCategory] = useState<Category | null>(null);
   const [index, setIndex] = useState(0);
   const [win, setWin] = useState<WinState>("normal");
-
-  const { pos, onMouseDown, onTouchStart } = useDraggable(() => {
-    const vw = window.innerWidth;
-    const vh = window.innerHeight;
-    const isMobile = vw < 720;
-    const winW = Math.min(680, vw - 32);
-    const tabsH = 30;
-    const boxH = Math.min(560, vh - 84);
-    return {
-      x: Math.max(isMobile ? 16 : 20, (vw - winW) / 2 + windowIndex * (isMobile ? 16 : 30)),
-      y: Math.max(44, (vh - boxH - tabsH) / 2 + windowIndex * (isMobile ? 20 : 24)),
-    };
-  });
 
   const items = useMemo(
     () => (category ? posts.filter((p) => p.tags[0] === category) : posts),
@@ -55,17 +39,15 @@ export function BlogPanel({
     setIndex(0);
   }
 
-  // Don't render until position is ready (avoids flash at 0,0)
-  if (!pos) return null;
-
   if (win === "closed") {
     return (
       <button
         onClick={() => setWin("normal")}
         style={{
           position: "fixed",
-          left: pos.x,
-          top: pos.y,
+          top: "50%",
+          left: "50%",
+          transform: "translate(-50%, -50%)",
           fontSize: 10,
           letterSpacing: "0.14em",
           color: "var(--muted)",
@@ -87,8 +69,6 @@ export function BlogPanel({
 
   const titleBar = (
     <div
-      onMouseDown={isFullscreen ? undefined : onMouseDown}
-      onTouchStart={isFullscreen ? undefined : onTouchStart}
       style={{
         display: "flex",
         alignItems: "center",
@@ -98,7 +78,7 @@ export function BlogPanel({
         flexShrink: 0,
         background: "var(--card)",
         userSelect: "none",
-        cursor: isFullscreen ? "default" : "grab",
+        cursor: "default",
       }}
     >
       <span
@@ -293,13 +273,13 @@ export function BlogPanel({
     );
   }
 
-  // Normal / minimized — draggable fixed window with category tabs above
   return (
     <div
       style={{
         position: "fixed",
-        left: pos.x,
-        top: pos.y,
+        top: "50%",
+        left: "50%",
+        transform: "translate(-50%, -50%)",
         width: "min(680px, calc(100vw - 32px))",
         display: "flex",
         flexDirection: "column",
@@ -348,7 +328,7 @@ export function BlogPanel({
       {/* Window box */}
       <div
         style={{
-          height: "min(560px, calc(100svh - 84px))",
+          height: "min(520px, calc(100svh - 140px))",
           display: "flex",
           flexDirection: "column",
           border: "1px solid var(--border)",

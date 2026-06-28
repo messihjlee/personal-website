@@ -39,7 +39,7 @@ export function BlogDesktop({ posts }: { posts: BlogPost[] }) {
 
   return (
     <>
-      <BlogPanel posts={posts} onOpen={openArticle} windowIndex={0} />
+      <BlogPanel posts={posts} onOpen={openArticle} />
 
       {openSlugs.map((slug) => (
         <BlogArticleWindow
