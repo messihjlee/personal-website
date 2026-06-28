@@ -110,11 +110,14 @@ export function BlogArticleWindow({
 
   const { pos, onMouseDown, onTouchStart } = useDraggable(() => {
     const vw = window.innerWidth;
+    const vh = window.innerHeight;
     const isMobile = vw < 720;
     if (isMobile) return { x: 16, y: 44 + windowIndex * 32 };
+    const winW = Math.min(680, vw - 32);
+    const winH = vh - 36 - 48;
     return {
-      x: Math.max(20, (vw - 680) / 2 + windowIndex * 30),
-      y: Math.max(44, 80 + windowIndex * 24),
+      x: Math.max(20, (vw - winW) / 2 + windowIndex * 30),
+      y: Math.max(44, (vh - winH) / 2 + windowIndex * 24),
     };
   });
 
