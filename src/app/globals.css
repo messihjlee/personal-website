@@ -68,7 +68,19 @@ body {
   animation: windowRestore 0.32s cubic-bezier(0.34, 1.56, 0.64, 1) both;
 }
 
+.home-card-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(160px, 240px));
+  gap: 32px;
+  justify-content: center;
+}
+
 @media (max-width: 640px) {
+  .home-card-grid {
+    grid-template-columns: repeat(2, minmax(140px, 190px));
+    gap: 18px;
+  }
+
   .research-panel-body {
     padding: 20px 16px 16px !important;
   }
