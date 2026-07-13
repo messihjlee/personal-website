@@ -2,23 +2,87 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import { PokerGame } from "@/components/poker/PokerGame";
 
 interface StackItem {
   href: string;
   label: string;
   sub: string;
+  game?: boolean;
 }
 
+// "test your luck" sits in the middle — it launches the poker game instead of
+// navigating, so the nav cards flank it two-per-side.
 const ITEMS: StackItem[] = [
-  { href: "/blog",     label: "blog",     sub: "writing"  },
-  { href: "/about",    label: "about",    sub: "profile"  },
-  { href: "/research", label: "research", sub: "research" },
-  { href: "/contact",  label: "contact",  sub: "links"    },
+  { href: "/blog",     label: "blog",           sub: "writing"  },
+  { href: "/about",    label: "about",          sub: "profile"  },
+  { href: "#",         label: "test your luck", sub: "poker", game: true },
+  { href: "/research", label: "research",       sub: "research" },
+  { href: "/contact",  label: "contact",        sub: "links"    },
 ];
+
+// Home cards are pre-baked images (public/cards/home-{i}.png) in ITEMS order:
+// a royal flush of spades whose rank has been replaced with the nav word.
+//
+// Positions below are each card's top-left corner as a multiple of the card
+// width W (card height = (67/50)·W). GAP_* are the empty space between
+// neighbouring cards, also in units of W.
+const H_OVER_W = 67 / 50;
+const GAP_X = 0.16;
+const GAP_Y = 0.14;
+const ROW_STEP = H_OVER_W + GAP_Y; // center-to-center vertical step, in W
+
+// Dice-5 (quincunx): four nav cards in the corners, game card centered.
+const DICE_LEFT = [0, 1 + GAP_X, (1 + GAP_X) / 2, 0, 1 + GAP_X];
+const DICE_TOP = [0, 0, ROW_STEP, 2 * ROW_STEP, 2 * ROW_STEP];
+
+const STEP_X = 1 + GAP_X; // horizontal card pitch, in W
+
+// The layout reflows with viewport width: narrow → dice-5, medium → 3-over-2,
+// wide → a single row of five. In every arrangement the game card sits center.
+const LAYOUTS = {
+  dice: {
+    // three card-heights tall, so cap by viewport height too (leaving room
+    // for the fixed header)
+    cardWidth: "clamp(84px, min(20vh, 44vw), 240px)",
+    left: DICE_LEFT,
+    top: DICE_TOP,
+    cw: 2 + GAP_X,
+    ch: 3 * H_OVER_W + 2 * GAP_Y,
+  },
+  threeTwo: {
+    cardWidth: "clamp(130px, 26vw, 230px)",
+    // top: blog(0) · game(2) · about(1); bottom: research(3) · contact(4)
+    left: [0, 2 * STEP_X, STEP_X, STEP_X / 2, STEP_X / 2 + STEP_X],
+    top: [0, 0, 0, ROW_STEP, ROW_STEP],
+    cw: 3 + 2 * GAP_X,
+    ch: 2 * H_OVER_W + GAP_Y,
+  },
+  row: {
+    cardWidth: "clamp(110px, 17vw, 210px)",
+    left: [0, STEP_X, 2 * STEP_X, 3 * STEP_X, 4 * STEP_X],
+    top: [0, 0, 0, 0, 0],
+    cw: 5 + 4 * GAP_X,
+    ch: H_OVER_W,
+  },
+} as const;
+
+type LayoutName = keyof typeof LAYOUTS;
+function pickLayout(w: number): LayoutName {
+  if (w >= 1180) return "row";
+  if (w >= 740) return "threeTwo";
+  return "dice";
+}
+
+// Entrance "deal": each card fades + springs up on load. Order is the four
+// corners first (reading order), then the center "test your luck" card last.
+const DEAL_ORDER = [0, 1, 4, 2, 3]; // per ITEMS index → stagger position
+const DEAL_STEP = 90; // ms between cards
 
 const FRICTION = 0.94;
 const MIN_VELOCITY = 0.35;
 const EDGE_PADDING = 12;
+
 // how far the pointer must travel from where it went down before a
 // gesture counts as a drag rather than a click — trackpad taps and real
 // mouse clicks both carry a few px of incidental jitter
@@ -30,13 +94,15 @@ interface DragPoint {
 }
 
 export function WindowStack() {
-  const [flipped, setFlipped] = useState<number | null>(null);
   const [hovered, setHovered] = useState<number | null>(null);
   const [hoverCapable, setHoverCapable] = useState(false);
   const [draggingIndex, setDraggingIndex] = useState<number | null>(null);
+  const [gameOpen, setGameOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  const [layoutName, setLayoutName] = useState<LayoutName>("dice");
   const draggingIndexRef = useRef<number | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const cardRefs = useRef<(HTMLAnchorElement | null)[]>([]);
+  const cardRefs = useRef<(HTMLElement | null)[]>([]);
   const posRef = useRef<DragPoint[]>(ITEMS.map(() => ({ x: 0, y: 0 })));
   const velRef = useRef<DragPoint[]>(ITEMS.map(() => ({ x: 0, y: 0 })));
   const originRef = useRef<DragPoint[]>(ITEMS.map(() => ({ x: 0, y: 0 })));
@@ -50,16 +116,19 @@ export function WindowStack() {
     setHoverCapable(mq.matches);
   }, []);
 
+  // trigger the one-time entrance "deal" on mount
   useEffect(() => {
-    if (flipped === null) return;
-    function onOutside(e: PointerEvent) {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
-        setFlipped(null);
-      }
-    }
-    window.addEventListener("pointerdown", onOutside);
-    return () => window.removeEventListener("pointerdown", onOutside);
-  }, [flipped]);
+    const raf = requestAnimationFrame(() => setMounted(true));
+    return () => cancelAnimationFrame(raf);
+  }, []);
+
+  // reflow the arrangement (dice / 3-over-2 / single row) with viewport width
+  useEffect(() => {
+    const update = () => setLayoutName(pickLayout(window.innerWidth));
+    update();
+    window.addEventListener("resize", update);
+    return () => window.removeEventListener("resize", update);
+  }, []);
 
   function applyTransform(i: number) {
     const el = cardRefs.current[i];
@@ -150,29 +219,41 @@ export function WindowStack() {
   }
 
   function handleClick(e: React.MouseEvent, i: number) {
+    // a drag that ends over the card shouldn't count as a click
     if (movedRef.current) {
       e.preventDefault();
       movedRef.current = false;
       return;
     }
-    // on hover-capable devices the front face is already showing on hover,
-    // so a click just opens it — only touch needs the reveal-then-open step
-    if (hoverCapable) return;
-    if (flipped !== i) {
-      e.preventDefault();
-      setFlipped(i);
+    // cards are face-up, so the game card opens on a single click and the nav
+    // cards just follow their link
+    if (ITEMS[i].game) {
+      e.preventDefault(); // href="#" is a no-op; the click opens the game
+      setGameOpen(true);
     }
   }
 
+  const layout = LAYOUTS[layoutName];
+
   return (
-    <div ref={containerRef} className="home-card-grid" style={{ maxWidth: "100%" }}>
+    <>
+    <div
+      ref={containerRef}
+      style={{
+        position: "relative",
+        width: `calc(${layout.cardWidth} * ${layout.cw})`,
+        height: `calc(${layout.cardWidth} * ${layout.ch})`,
+        maxWidth: "100%",
+        transition: "width 0.4s ease, height 0.4s ease",
+      }}
+    >
       {ITEMS.map((item, i) => {
-        const isFlipped = flipped === i || (hoverCapable && hovered === i);
+        const isHovered = hoverCapable && hovered === i;
         const isDragging = draggingIndex === i;
 
         return (
           <Link
-            key={item.href}
+            key={item.label}
             ref={(el) => {
               cardRefs.current[i] = el;
             }}
@@ -187,138 +268,55 @@ export function WindowStack() {
             onPointerUp={() => onPointerUp(i)}
             onPointerCancel={() => onPointerUp(i)}
             style={{
-              width: "100%",
-              aspectRatio: "192 / 270",
+              width: layout.cardWidth,
+              aspectRatio: "50 / 67",
               display: "block",
               textDecoration: "none",
-              position: "relative",
+              position: "absolute",
+              left: `calc(${layout.cardWidth} * ${layout.left[i]})`,
+              top: `calc(${layout.cardWidth} * ${layout.top[i]})`,
+              transition: isDragging
+                ? "none"
+                : "left 0.4s ease, top 0.4s ease, width 0.4s ease",
               touchAction: hoverCapable ? "none" : undefined,
               cursor: hoverCapable ? (isDragging ? "grabbing" : "grab") : undefined,
-              zIndex: isDragging ? 20 : isFlipped ? 10 : 1,
+              zIndex: isDragging ? 20 : isHovered ? 10 : item.game ? 2 : 1,
             }}
           >
-            {/* pop layer: hover/flip lift, kept separate from the drag
-                translate above so the two transforms don't fight */}
+            {/* entrance layer: one-time deal-in on load, staggered per card.
+                Separate from the pop/drag layers so it only ever animates once */}
             <div
               style={{
                 width: "100%",
                 height: "100%",
-                perspective: 1200,
-                transform: isFlipped ? "translateY(-14px) scale(1.08)" : "none",
-                transition: isDragging
-                  ? "none"
-                  : "transform 0.32s cubic-bezier(0.34, 1.56, 0.64, 1)",
+                opacity: mounted ? 1 : 0,
+                transform: mounted ? "none" : "translateY(26px)",
+                transition:
+                  "opacity 0.5s ease, transform 0.55s cubic-bezier(0.34, 1.56, 0.64, 1)",
+                transitionDelay: `${DEAL_ORDER[i] * DEAL_STEP + 40}ms`,
               }}
             >
-              <div
-                style={{
-                  position: "relative",
-                  width: "100%",
-                  height: "100%",
-                  transformStyle: "preserve-3d",
-                  transition: "transform 0.5s cubic-bezier(0.4, 0.2, 0.2, 1)",
-                  transform: isFlipped ? "rotateY(180deg)" : "rotateY(0deg)",
-                }}
-              >
-                {/* Back face */}
-                <div
-                  style={{
-                    position: "absolute",
-                    inset: 0,
-                    backfaceVisibility: "hidden",
-                    border: "1px solid var(--border)",
-                    background:
-                      "repeating-linear-gradient(135deg, var(--card), var(--card) 9px, var(--background) 9px, var(--background) 18px)",
-                  }}
-                />
-
-                {/* Front face */}
-                <div
-                  style={{
-                    position: "absolute",
-                    inset: 0,
-                    backfaceVisibility: "hidden",
-                    transform: "rotateY(180deg)",
-                    border: "1px solid var(--border)",
-                    background: "var(--background)",
-                    display: "flex",
-                    flexDirection: "column",
-                  }}
-                >
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      padding: "13px 16px",
-                      borderBottom: "1px solid var(--border)",
-                      background: "var(--card)",
-                      flexShrink: 0,
-                    }}
-                  >
-                    <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
-                      <span style={dotStyle("#ff5f57")} />
-                      <span style={dotStyle("#f5a623")} />
-                      <span style={dotStyle("#27c93f")} />
-                    </div>
-                    <span
-                      style={{
-                        fontSize: 13,
-                        letterSpacing: "0.12em",
-                        color: "var(--muted)",
-                      }}
-                    >
-                      {item.sub}
-                    </span>
-                  </div>
-                  <div
-                    style={{
-                      flex: 1,
-                      display: "flex",
-                      flexDirection: "column",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      gap: 14,
-                    }}
-                  >
-                    <span
-                      style={{
-                        fontSize: 26,
-                        letterSpacing: "0.14em",
-                        color: "var(--foreground)",
-                      }}
-                    >
-                      {item.label}
-                    </span>
-                    {isFlipped && (
-                      <span
-                        style={{
-                          fontSize: 13,
-                          letterSpacing: "0.1em",
-                          color: "var(--muted)",
-                        }}
-                      >
-                        {hoverCapable ? "click to open" : "tap again to open"}
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </div>
+            {/* the card itself, baked face-up (the nav word is part of the
+                card art, in the rank position); a gentle lift on hover */}
+            <div
+              style={{
+                width: "100%",
+                height: "100%",
+                backgroundImage: `url(/cards/home-${i}.png)`,
+                backgroundSize: "100% 100%",
+                imageRendering: "pixelated",
+                transform: isHovered ? "translateY(-10px) scale(1.05)" : "none",
+                transition: isDragging
+                  ? "none"
+                  : "transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)",
+              }}
+            />
             </div>
           </Link>
         );
       })}
     </div>
+    {gameOpen && <PokerGame onClose={() => setGameOpen(false)} />}
+    </>
   );
-}
-
-function dotStyle(color: string): React.CSSProperties {
-  return {
-    width: 11,
-    height: 11,
-    borderRadius: "50%",
-    background: color,
-    display: "inline-block",
-    flexShrink: 0,
-  };
 }

@@ -20,7 +20,7 @@ const labelStyle: React.CSSProperties = {
   textDecoration: "none",
 };
 
-export function SiteHeader({ homeLabel = "finding-color" }: { homeLabel?: string }) {
+export function SiteHeader() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const navItems = NAV.filter((item) => item.href !== pathname);
@@ -44,17 +44,12 @@ export function SiteHeader({ homeLabel = "finding-color" }: { homeLabel?: string
         height: 36,
         display: "flex",
         alignItems: "center",
-        justifyContent: "space-between",
+        justifyContent: "center",
         padding: "0 20px",
-        borderBottom: "1px solid var(--border)",
         background: "var(--background)",
         zIndex: 50,
       }}
     >
-      <Link href="/" style={labelStyle} aria-label="Home">
-        {homeLabel}
-      </Link>
-
       <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
         {/* Scroll-down arrow nav trigger */}
         <div ref={ref} style={{ position: "relative" }}>

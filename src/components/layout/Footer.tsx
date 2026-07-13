@@ -7,6 +7,17 @@ export function Footer() {
         <p className="text-sm text-muted">
           &copy; {new Date().getFullYear()} {siteConfig.name}
         </p>
+        <p className="text-sm text-muted">
+          Card back designs:{" "}
+          <a
+            href="https://opengameart.org/content/pixel-poker-cards"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Pixel Poker Cards
+          </a>{" "}
+          (CC BY 4.0)
+        </p>
       </div>
     </footer>
   );

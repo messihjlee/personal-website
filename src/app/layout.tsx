@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Space_Grotesk } from "next/font/google";
+import { Poppins } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { Providers } from "./providers";
 import { GlobalHeader } from "@/components/ui/GlobalHeader";
@@ -7,8 +7,8 @@ import { siteConfig } from "@/lib/constants";
 import { PathTracker } from "@/components/PathTracker";
 import "./globals.css";
 
-const spaceGrotesk = Space_Grotesk({
-  variable: "--font-space-grotesk",
+const poppins = Poppins({
+  variable: "--font-poppins",
   subsets: ["latin"],
   weight: ["300", "400", "500", "600", "700"],
 });
@@ -28,7 +28,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${spaceGrotesk.variable} antialiased`}>
+      <body className={`${poppins.variable} antialiased`}>
         <Providers>
           <GlobalHeader />
           <PathTracker />

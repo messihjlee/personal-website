@@ -10,6 +10,7 @@ export const metadata: Metadata = {
 
 const SECTIONS = [
   { slug: "researcher", title: "researcher" },
+  { slug: "research",   title: "research" },
   { slug: "person",     title: "person" },
   { slug: "now",        title: "now" },
   { slug: "connect",    title: "connect" },
@@ -35,7 +36,6 @@ export default function AboutPage() {
     >
       <div
         style={{
-          borderTop: "1px solid var(--border)",
           minHeight: "calc(100svh - 36px)",
           display: "flex",
           alignItems: "center",

@@ -17,7 +17,6 @@ export default function FoundPage() {
     >
       <div
         style={{
-          borderTop: "1px solid var(--border)",
           minHeight: "calc(100svh - 36px)",
           display: "flex",
           flexDirection: "column",

@@ -1,10 +1,7 @@
-"use client";
-
-import { usePathname } from "next/navigation";
 import { SiteHeader } from "./SiteHeader";
 
+// Shown on every page — including the home page — as a centered set of icon
+// controls at the top.
 export function GlobalHeader() {
-  const pathname = usePathname();
-  if (pathname === "/") return null;
-  return <SiteHeader homeLabel="home" />;
+  return <SiteHeader />;
 }

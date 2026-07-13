@@ -5,6 +5,10 @@ export const siteConfig = {
   description:
     "Researcher exploring the intersection of psychology, cognition, and artificial intelligence.",
   url: "https://messihjlee.com",
+  // Where the "test your luck" donation flow sends supporters. Ko-fi takes no
+  // fee on one-off donations — swap this single line for GitHub Sponsors /
+  // Stripe / PayPal to change the target everywhere.
+  donationUrl: "https://ko-fi.com/messihjlee",
 };
 
 export const navLinks = [

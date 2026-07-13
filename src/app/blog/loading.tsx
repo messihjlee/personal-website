@@ -6,7 +6,6 @@ export default function BlogLoading() {
     >
       <div
         style={{
-          borderTop: "1px solid",
           borderColor: "color-mix(in srgb, var(--foreground) 20%, transparent)",
           minHeight: "calc(100dvh - 3vh)",
         }}

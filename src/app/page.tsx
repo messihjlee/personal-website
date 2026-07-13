@@ -10,7 +10,7 @@ export default function Home() {
         alignItems: "center",
         justifyContent: "center",
         background: "var(--background)",
-        padding: "0 16px",
+        padding: "36px 16px 0",
       }}
     >
       <WindowStack />

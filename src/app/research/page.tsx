@@ -19,7 +19,6 @@ export default function ResearchPage() {
     >
       <div
         style={{
-          borderTop: "1px solid var(--border)",
           minHeight: "calc(100svh - 36px)",
           display: "flex",
           alignItems: "center",

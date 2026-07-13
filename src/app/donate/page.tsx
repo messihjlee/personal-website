@@ -1,16 +1,11 @@
 import type { Metadata } from "next";
-import { getAllPosts } from "@/lib/notion";
-import { BlogDesktop } from "@/components/blog/BlogDesktop";
-
-export const revalidate = 300;
+import { DonatePanel } from "@/components/donate/DonatePanel";
 
 export const metadata: Metadata = {
-  title: "Blog",
+  title: "Support",
 };
 
-export default async function BlogPage() {
-  const posts = await getAllPosts();
-
+export default function DonatePage() {
   return (
     <div
       style={{
@@ -22,9 +17,13 @@ export default async function BlogPage() {
       <div
         style={{
           minHeight: "calc(100svh - 36px)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: "24px 16px",
         }}
       >
-        <BlogDesktop posts={posts} />
+        <DonatePanel />
       </div>
     </div>
   );
