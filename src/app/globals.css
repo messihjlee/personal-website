@@ -6,15 +6,27 @@
 :root {
   --background: #f4f2ee;
   --foreground: #0e0f11;
-  --muted: #717480;
+  /* text tone is uniform: buttons, dates, tags and subtext all read as --foreground */
+  --muted: #0e0f11;
+  --disabled: #a3a5ac;
   --border: #1e2128;
   --card: #eae7e1;
+  /* hairline border on windows and buttons alike */
+  --card-ink: 1px;
+  /* iOS-style rounding: the button curve is scaled to its smaller box, so the
+     two read as the same shape at different sizes */
+  --radius-window: 14px;
+  --radius-btn: 8px;
+  /* one width for every button on the site. The floor is set so four of them
+     plus their gaps fit across the narrowest phone (4x68 + 3x8 = 296px) */
+  --btn-w: clamp(68px, 17vw, 104px);
 }
 
 .dark {
   --background: #24262b;
   --foreground: #d8dce5;
-  --muted: #616978;
+  --muted: #d8dce5;
+  --disabled: #6a6f7a;
   --border: #d8dce5;
   --card: #2e3037;
 }
@@ -23,6 +35,7 @@
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-muted: var(--muted);
+  --color-disabled: var(--disabled);
   --color-border: var(--border);
   --color-card: var(--card);
   --font-sans: var(--font-poppins);
@@ -68,10 +81,85 @@ body {
   animation: windowRestore 0.32s cubic-bezier(0.34, 1.56, 0.64, 1) both;
 }
 
+/* ---- card window ------------------------------------------------------
+   Panes across the site: a hairline border and softly rounded, iOS-style
+   corners, with the title bar, traffic-light dots and nav bar inside.
+
+   overflow: hidden makes the bars follow the rounded corners, so the title bar
+   and nav bar tuck into the curve instead of squaring it off. */
+.card-window {
+  position: relative;
+  background: var(--background);
+  border: var(--card-ink) solid var(--border);
+  border-radius: var(--radius-window);
+  overflow: hidden;
+}
+
+.card-window-inner {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+/* buttons carry the same hairline and a proportionally smaller curve */
+.pixel-edge {
+  border-radius: var(--radius-btn);
+  white-space: nowrap;
+}
+
+@media (max-width: 560px) {
+  /* at the narrow end the widest labels ("collapse", "research") only fit if
+     the type tightens with the box */
+  .pixel-edge {
+    font-size: 11px !important;
+    letter-spacing: 0.02em !important;
+  }
+}
+
+/* home cards: pixel art inside the .card-window frame, so their edge is the
+   same hairline and curve as every other pane rather than a jagged stair of
+   pixels. The art fills the frame; the frame's overflow trims it to the curve. */
+.home-card {
+  width: 100%;
+  height: 100%;
+  /* the art is always a light card face, so the edge stays ink-dark in both
+     themes instead of following --border into light grey. It is drawn at twice
+     the window hairline: the cards float alone on the page, with no bars or
+     body behind them, so a 1px edge reads as too faint */
+  border-color: #14101e;
+  border-width: calc(var(--card-ink) * 2);
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  image-rendering: pixelated;
+}
+
+/* corner index — the rank/suit block of a playing card */
+.card-index {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  letter-spacing: 0.14em;
+  color: var(--foreground);
+  min-width: 0;
+}
+
 /* poker table */
 @keyframes pokerFade {
   from { opacity: 0; }
   to { opacity: 1; }
+}
+
+/* page navigation — same entrance the poker table gets */
+.page-fade {
+  animation: pokerFade 0.4s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-fade {
+    animation: none;
+  }
 }
 
 .poker-row {

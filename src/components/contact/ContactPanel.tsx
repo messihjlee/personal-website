@@ -2,24 +2,29 @@
 
 import { useState } from "react";
 import { Mail, Github, GraduationCap, BookOpen } from "lucide-react";
+import { useDraggable } from "@/hooks/useDraggable";
+import { BTN_W, CardWindow, NavBar } from "@/components/ui/CardWindow";
 
 interface WindowEntry {
   id: string;
   title: string;
-  color: string;
   icon: React.ReactNode;
   note: string;
   linkLabel: string;
   href: string;
 }
 
-type WinState = "normal" | "minimized" | "closed";
+type WinState = "normal" | "minimized" | "fullscreen" | "closed";
+
+const WINDOW_W = 680;
+const WINDOW_H = 360;
+const WINDOW_TOP = 48;
+const BOTTOM_RESERVED = 48;
 
 const WINDOWS: WindowEntry[] = [
   {
     id: "email",
     title: "email",
-    color: "#ff5f57",
     icon: <Mail size={32} strokeWidth={1.5} />,
     note: "Want to reach out directly or inquire about a possible collaboration opportunity?",
     linkLabel: "messihjlee@gmail.com",
@@ -28,7 +33,6 @@ const WINDOWS: WindowEntry[] = [
   {
     id: "github",
     title: "github",
-    color: "#f5a623",
     icon: <Github size={32} strokeWidth={1.5} />,
     note: "Curious about what projects I'm currently working on?",
     linkLabel: "github.com/messihjlee",
@@ -37,7 +41,6 @@ const WINDOWS: WindowEntry[] = [
   {
     id: "scholar",
     title: "google scholar",
-    color: "#27c93f",
     icon: <GraduationCap size={32} strokeWidth={1.5} />,
     note: "Want to browse my published work and citation record?",
     linkLabel: "Google Scholar profile",
@@ -46,7 +49,6 @@ const WINDOWS: WindowEntry[] = [
   {
     id: "researchgate",
     title: "researchgate",
-    color: "#4fc3f7",
     icon: <BookOpen size={32} strokeWidth={1.5} />,
     note: "Looking for preprints, full texts, or research updates?",
     linkLabel: "ResearchGate profile",
@@ -54,94 +56,104 @@ const WINDOWS: WindowEntry[] = [
   },
 ];
 
-function ContactWindow({ entry }: { entry: WindowEntry }) {
+export function ContactPanel() {
+  const [index, setIndex] = useState(0);
   const [win, setWin] = useState<WinState>("normal");
+
+  const { pos, onMouseDown, onTouchStart } = useDraggable(() => {
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    const winW = Math.min(WINDOW_W, vw - 32);
+    const winH = Math.min(WINDOW_H, vh - WINDOW_TOP - BOTTOM_RESERVED);
+    return {
+      x: Math.max(16, (vw - winW) / 2),
+      y: Math.max(WINDOW_TOP, (vh - BOTTOM_RESERVED - winH) / 2),
+    };
+  });
+
+  if (!pos) return null;
+
+  const entry = WINDOWS[index];
 
   if (win === "closed") {
     return (
       <button
+        className="pixel-edge"
         onClick={() => setWin("normal")}
         style={{
-          fontSize: 10,
+          position: "fixed",
+          left: pos.x,
+          top: pos.y,
+          fontSize: 13,
           letterSpacing: "0.14em",
           color: "var(--muted)",
           background: "none",
           border: "1px solid var(--border)",
-          padding: "6px 14px",
+          padding: "8px 0",
+          width: BTN_W,
+          textAlign: "center",
           cursor: "pointer",
           fontFamily: "inherit",
-          alignSelf: "start",
+          zIndex: 10,
         }}
       >
-        {entry.title}
+        contact
       </button>
     );
   }
 
+  const isFullscreen = win === "fullscreen";
   const isMinimized = win === "minimized";
 
+  const style: React.CSSProperties = isFullscreen
+    ? { position: "fixed", top: 37, left: 0, right: 0, bottom: 0, zIndex: 50 }
+    : {
+        position: "fixed",
+        left: pos.x,
+        top: pos.y,
+        width: `min(${WINDOW_W}px, calc(100vw - 32px))`,
+        height: isMinimized
+          ? "auto"
+          : `min(${WINDOW_H}px, calc(100svh - ${Math.round(pos.y) + 24}px))`,
+        zIndex: 10,
+      };
+
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        border: "1px solid var(--border)",
-        background: "var(--background)",
-      }}
+    <CardWindow
+      label="contact"
+      subtitle={entry.title}
+      minimized={isMinimized}
+      fullscreen={isFullscreen}
+      onClose={() => setWin("closed")}
+      onMinimize={() => setWin(isMinimized ? "normal" : "minimized")}
+      onFullscreen={() => setWin(isFullscreen ? "normal" : "fullscreen")}
+      dragProps={{ onMouseDown, onTouchStart }}
+      style={style}
+      footer={
+        <NavBar
+          index={index}
+          total={WINDOWS.length}
+          onPrev={() => setIndex((i) => Math.max(0, i - 1))}
+          onNext={() => setIndex((i) => Math.min(WINDOWS.length - 1, i + 1))}
+        />
+      }
     >
-      {/* Title bar */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          padding: "9px 14px",
-          borderBottom: isMinimized ? "none" : "1px solid var(--border)",
-          flexShrink: 0,
-          background: "var(--card)",
-          userSelect: "none",
-        }}
-      >
-        <span
-          style={{
-            fontSize: 10,
-            letterSpacing: "0.14em",
-            color: "var(--muted)",
-          }}
-        >
-          contact · {entry.title}
-        </span>
-
-        <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
-          <button
-            onClick={() => setWin("closed")}
-            aria-label="Close"
-            title="close"
-            style={dotStyle("#ff5f57")}
-          />
-          <button
-            onClick={() => setWin(isMinimized ? "normal" : "minimized")}
-            aria-label="Minimize"
-            title="minimize"
-            style={dotStyle("#f5a623")}
-          />
-          {/* green dot is decorative / placeholder */}
-          <span style={dotStyle("#27c93f")} />
-        </div>
-      </div>
-
       {!isMinimized && (
         <div
           style={{
-            padding: "28px 24px",
+            flex: 1,
+            minHeight: 0,
+            overflowY: "auto",
+            padding: "32px 28px",
             display: "flex",
             flexDirection: "column",
-            gap: 20,
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 22,
+            textAlign: "center",
           }}
         >
-          <div style={{ color: "var(--foreground)", opacity: 0.75 }}>
-            {entry.icon}
-          </div>
+          <div style={{ color: "var(--foreground)", opacity: 0.75 }}>{entry.icon}</div>
 
           <p
             style={{
@@ -150,6 +162,7 @@ function ContactWindow({ entry }: { entry: WindowEntry }) {
               color: "var(--foreground)",
               margin: 0,
               letterSpacing: "0.04em",
+              maxWidth: 420,
             }}
           >
             {entry.note}
@@ -167,46 +180,12 @@ function ContactWindow({ entry }: { entry: WindowEntry }) {
               textDecoration: "none",
               borderBottom: "1px solid var(--border)",
               paddingBottom: 2,
-              alignSelf: "start",
             }}
           >
             {entry.linkLabel} →
           </a>
         </div>
       )}
-    </div>
+    </CardWindow>
   );
-}
-
-export function ContactPanel() {
-  return (
-    <div
-      className="contact-grid"
-      style={{
-        width: "100%",
-        maxWidth: 720,
-        display: "grid",
-        gridTemplateColumns: "repeat(2, 1fr)",
-        gap: 16,
-      }}
-    >
-      {WINDOWS.map((entry) => (
-        <ContactWindow key={entry.id} entry={entry} />
-      ))}
-    </div>
-  );
-}
-
-function dotStyle(color: string): React.CSSProperties {
-  return {
-    width: 12,
-    height: 12,
-    borderRadius: "50%",
-    background: color,
-    border: "none",
-    cursor: "pointer",
-    padding: 0,
-    flexShrink: 0,
-    display: "inline-block",
-  };
 }

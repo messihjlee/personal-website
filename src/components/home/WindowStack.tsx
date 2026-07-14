@@ -22,7 +22,9 @@ const ITEMS: StackItem[] = [
 ];
 
 // Home cards are pre-baked images (public/cards/home-{i}.png) in ITEMS order:
-// a royal flush of spades whose rank has been replaced with the nav word.
+// a royal flush of spades whose rank has been replaced with the nav word. The
+// art is borderless; the edge comes from the .card-window frame the blog and
+// research panes use.
 //
 // Positions below are each card's top-left corner as a multiple of the card
 // width W (card height = (67/50)·W). GAP_* are the empty space between
@@ -296,15 +298,14 @@ export function WindowStack() {
                 transitionDelay: `${DEAL_ORDER[i] * DEAL_STEP + 40}ms`,
               }}
             >
-            {/* the card itself, baked face-up (the nav word is part of the
-                card art, in the rank position); a gentle lift on hover */}
+            {/* the card face, baked face-up (the nav word is part of the card
+                art, in the rank position). The art is borderless — the edge is
+                the .card-window frame every other pane on the site wears.
+                A gentle lift on hover */}
             <div
+              className="card-window home-card"
               style={{
-                width: "100%",
-                height: "100%",
                 backgroundImage: `url(/cards/home-${i}.png)`,
-                backgroundSize: "100% 100%",
-                imageRendering: "pixelated",
                 transform: isHovered ? "translateY(-10px) scale(1.05)" : "none",
                 transition: isDragging
                   ? "none"

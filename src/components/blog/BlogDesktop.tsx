@@ -57,7 +57,8 @@ export function BlogDesktop({ posts }: { posts: BlogPost[] }) {
         <div
           style={{
             position: "fixed",
-            bottom: 20,
+            // sits above the category buttons pinned to the bottom of the page
+            bottom: 82,
             left: "50%",
             transform: "translateX(-50%)",
             display: "flex",
@@ -78,12 +79,12 @@ export function BlogDesktop({ posts }: { posts: BlogPost[] }) {
                 onClick={() => restoreArticle(slug)}
                 style={{
                   flexShrink: 0,
-                  fontSize: 10,
+                  fontSize: 12,
                   letterSpacing: "0.13em",
                   color: "var(--foreground)",
                   background: "var(--card)",
                   border: "1px solid var(--border)",
-                  padding: "7px 14px",
+                  padding: "9px 16px",
                   cursor: "pointer",
                   fontFamily: "inherit",
                   whiteSpace: "nowrap",

@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { PlayingCard } from "./PlayingCard";
 import { SiteHeader } from "@/components/ui/SiteHeader";
+import { BTN_W } from "@/components/ui/CardWindow";
 import { compareHands, deal, evaluateHand, type Card } from "@/lib/poker";
 
 type Phase = "dealing" | "betting" | "reveal" | "result";
@@ -163,15 +164,20 @@ export function PokerGame({ onClose }: PokerGameProps) {
           <div style={{ marginTop: 10 }}>
             <div style={{ display: "flex", gap: 10, justifyContent: "center", marginTop: 12 }}>
               <button
+                className="pixel-edge"
                 onClick={() => {
                   setFolded(true);
                   setPhase("result");
                 }}
-                style={{ ...chipStyle, minWidth: 96 }}
+                style={{ ...chipStyle, padding: "8px 0", width: BTN_W }}
               >
                 fold
               </button>
-              <button onClick={() => setPhase("reveal")} style={{ ...chipStyle, minWidth: 96 }}>
+              <button
+                className="pixel-edge"
+                onClick={() => setPhase("reveal")}
+                style={{ ...chipStyle, padding: "8px 0", width: BTN_W }}
+              >
                 check
               </button>
             </div>
@@ -218,7 +224,11 @@ function ResultPanel({
       <div style={{ marginTop: 12 }}>
         <p style={hudTitle}>the house wins</p>
         <p style={hudMuted}>funding the research… redirecting</p>
-        <button onClick={() => router.push("/donate")} style={{ ...chipStyle, marginTop: 12 }}>
+        <button
+          className="pixel-edge"
+          onClick={() => router.push("/donate")}
+          style={{ ...chipStyle, marginTop: 12 }}
+        >
           continue →
         </button>
       </div>
@@ -229,7 +239,7 @@ function ResultPanel({
       <div style={{ marginTop: 12 }}>
         <p style={hudTitle}>push — it&apos;s a tie</p>
         <div style={{ display: "flex", gap: 10, justifyContent: "center", marginTop: 10 }}>
-          <button onClick={onClose} style={chipStyle}>deal again</button>
+          <button className="pixel-edge" onClick={onClose} style={chipStyle}>deal again</button>
         </div>
       </div>
     );
@@ -239,7 +249,11 @@ function ResultPanel({
       <p style={hudTitle}>you win 🎉</p>
       <div style={{ display: "flex", gap: 10, justifyContent: "center", marginTop: 10, flexWrap: "wrap" }}>
         <button onClick={onClose} style={chipStyle}>deal again</button>
-        <button onClick={() => router.push("/donate")} style={{ ...chipStyle, ...chipGhost }}>
+        <button
+          className="pixel-edge"
+          onClick={() => router.push("/donate")}
+          style={{ ...chipStyle, ...chipGhost }}
+        >
           fund the research anyway →
         </button>
       </div>
@@ -261,16 +275,17 @@ const hudTitle: React.CSSProperties = {
   fontWeight: 700,
 };
 
-// both bet/result buttons share one clean outlined style so they read as a set
+// the bet and result buttons are the site's button: same type, hairline and
+// curve as nav, research and blog (the curve comes from .pixel-edge)
 const chipStyle: React.CSSProperties = {
   fontFamily: "inherit",
-  fontSize: 15,
-  fontWeight: 500,
-  letterSpacing: "0.04em",
+  fontSize: 13,
+  letterSpacing: "0.12em",
   color: "var(--foreground)",
-  background: "transparent",
+  background: "none",
   border: "1px solid var(--border)",
   padding: "8px 22px",
+  textAlign: "center",
   cursor: "pointer",
 };
 

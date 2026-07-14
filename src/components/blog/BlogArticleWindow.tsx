@@ -5,6 +5,7 @@ import { MDXRemote } from "next-mdx-remote";
 import type { MDXRemoteSerializeResult } from "next-mdx-remote";
 import Image from "next/image";
 import { useDraggable } from "@/hooks/useDraggable";
+import { CardWindow } from "@/components/ui/CardWindow";
 
 interface ArticleData {
   title: string;
@@ -36,8 +37,8 @@ const mdxComponents = {
       target="_blank"
       rel="noopener noreferrer"
       style={{
-        display: "inline-block", marginTop: "1rem", fontSize: 10, letterSpacing: "0.14em",
-        color: "var(--foreground)", border: "1px solid var(--border)", padding: "6px 16px",
+        display: "inline-block", marginTop: "1rem", fontSize: 12, letterSpacing: "0.14em",
+        color: "var(--foreground)", border: "1px solid var(--border)", padding: "8px 18px",
         textDecoration: "none", fontFamily: "inherit", cursor: "pointer",
       }}
     >
@@ -142,8 +143,8 @@ export function BlogArticleWindow({
           position: "fixed",
           left: pos.x,
           top: pos.y,
-          fontSize: 10, letterSpacing: "0.14em", color: "var(--muted)", background: "none",
-          border: "1px solid var(--border)", padding: "6px 14px", cursor: "pointer", fontFamily: "inherit",
+          fontSize: 12, letterSpacing: "0.14em", color: "var(--muted)", background: "none",
+          border: "1px solid var(--border)", padding: "8px 18px", cursor: "pointer", fontFamily: "inherit",
           zIndex: 10,
         }}
       >
@@ -154,79 +155,34 @@ export function BlogArticleWindow({
 
   const isFullscreen = win === "fullscreen";
 
-  const titleBar = (
-    <div
-      onMouseDown={isFullscreen ? undefined : onMouseDown}
-      onTouchStart={isFullscreen ? undefined : onTouchStart}
-      style={{
-        display: "flex", alignItems: "center", justifyContent: "space-between",
-        padding: "9px 14px", borderBottom: "1px solid var(--border)",
-        flexShrink: 0, background: "var(--card)", userSelect: "none",
-        cursor: isFullscreen ? "default" : "grab",
-        touchAction: "none",
-      }}
-    >
-      <span
-        style={{
-          fontSize: 10, letterSpacing: "0.14em", color: "var(--foreground)",
-          overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
-          minWidth: 0, flex: 1, marginRight: 12,
-        }}
-      >
-        blog · {shortTitle}
-      </span>
-      <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
-        <button onClick={onClose} aria-label="Close" title="close" style={dotStyle("#ff5f57")} />
-        <button onClick={onMinimize} aria-label="Minimize" title="minimize" style={dotStyle("#f5a623")} />
-        <button onClick={() => setWin(isFullscreen ? "normal" : "fullscreen")} aria-label="Fullscreen" title="fullscreen" style={dotStyle("#27c93f")} />
-      </div>
-    </div>
-  );
-
-  if (isFullscreen) {
-    return (
-      <div
-        className="window-restore"
-        style={{
-          position: "fixed", top: 37, left: 0, right: 0, bottom: 0,
-          display: "flex", flexDirection: "column", background: "var(--background)",
-          border: "1px solid var(--border)", zIndex: 50,
-        }}
-      >
-        {titleBar}
-        {articleBody(article, loading, win, setWin)}
-      </div>
-    );
-  }
-
-  return (
-    <div
-      className="window-restore"
-      style={{
+  const style: React.CSSProperties = isFullscreen
+    ? { position: "fixed", top: 37, left: 0, right: 0, bottom: 0, zIndex: 50 }
+    : {
         position: "fixed",
         left: pos.x,
         top: pos.y,
         width: "min(680px, calc(100vw - 32px))",
         height: "min(680px, calc(100svh - 84px))",
-        display: "flex",
-        flexDirection: "column",
-        border: "1px solid var(--border)",
-        background: "var(--background)",
         zIndex: 10,
-      }}
+      };
+
+  return (
+    <CardWindow
+      label="blog"
+      subtitle={shortTitle}
+      fullscreen={isFullscreen}
+      onClose={onClose}
+      onMinimize={onMinimize}
+      onFullscreen={() => setWin(isFullscreen ? "normal" : "fullscreen")}
+      dragProps={{ onMouseDown, onTouchStart }}
+      style={style}
     >
-      {titleBar}
-      {articleBody(article, loading, win, setWin)}
-    </div>
+      {articleBody(article, loading)}
+    </CardWindow>
   );
 }
 
-function articleBody(
-  article: ArticleData | null,
-  loading: boolean,
-  win: WinState,
-  setWin: (w: WinState) => void,
-) {
+function articleBody(article: ArticleData | null, loading: boolean) {
   if (loading) {
     return (
       <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: 48 }}>
@@ -296,9 +252,3 @@ function articleBody(
   );
 }
 
-function dotStyle(color: string): React.CSSProperties {
-  return {
-    width: 12, height: 12, borderRadius: "50%", background: color,
-    border: "none", cursor: "pointer", padding: 0, flexShrink: 0,
-  };
-}

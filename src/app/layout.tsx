@@ -5,6 +5,7 @@ import { Providers } from "./providers";
 import { GlobalHeader } from "@/components/ui/GlobalHeader";
 import { siteConfig } from "@/lib/constants";
 import { PathTracker } from "@/components/PathTracker";
+import { PageTransition } from "@/components/ui/PageTransition";
 import "./globals.css";
 
 const poppins = Poppins({
@@ -32,7 +33,7 @@ export default function RootLayout({
         <Providers>
           <GlobalHeader />
           <PathTracker />
-          {children}
+          <PageTransition>{children}</PageTransition>
           <Analytics />
         </Providers>
       </body>

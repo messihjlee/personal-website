@@ -1,0 +1,181 @@
+"use client";
+
+/**
+ * The pane used across the site: a pixel playing card crossed with a window.
+ *
+ * The frame (ink border, stepped corners, corner indices) comes from the home
+ * page cards; the title bar, traffic-light dots and nav bar come from the old
+ * window design. Panels supply their own body and footer, so blog, research,
+ * about and contact all sit in an identical frame.
+ */
+
+export const SUIT = "♠";
+
+export function CardWindow({
+  label,
+  subtitle,
+  minimized = false,
+  fullscreen = false,
+  onClose,
+  onMinimize,
+  onFullscreen,
+  dragProps,
+  footer,
+  style,
+  innerRef,
+  children,
+}: {
+  label: string;
+  subtitle?: string;
+  minimized?: boolean;
+  fullscreen?: boolean;
+  onClose?: () => void;
+  onMinimize?: () => void;
+  onFullscreen?: () => void;
+  dragProps?: {
+    onMouseDown?: (e: React.MouseEvent) => void;
+    onTouchStart?: (e: React.TouchEvent) => void;
+  };
+  footer?: React.ReactNode;
+  style?: React.CSSProperties;
+  innerRef?: React.Ref<HTMLDivElement>;
+  children?: React.ReactNode;
+}) {
+  const draggable = !!dragProps && !fullscreen;
+
+  return (
+    <div ref={innerRef} className="card-window" style={style}>
+      <div className="card-window-inner">
+        <div
+          onMouseDown={draggable ? dragProps?.onMouseDown : undefined}
+          onTouchStart={draggable ? dragProps?.onTouchStart : undefined}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            minHeight: BAR_H,
+            padding: "0 14px",
+            borderBottom: minimized ? "none" : "1px solid var(--border)",
+            flexShrink: 0,
+            background: "var(--card)",
+            userSelect: "none",
+            cursor: draggable ? "grab" : "default",
+            touchAction: "none",
+          }}
+        >
+          <span className="card-index" style={{ flex: 1, marginRight: 12 }}>
+            <span style={{ fontSize: 15 }}>{SUIT}</span>
+            <span
+              style={{
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+                minWidth: 0,
+              }}
+            >
+              {subtitle ? `${label} · ${subtitle}` : label}
+            </span>
+          </span>
+          <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
+            {onClose ? (
+              <button onClick={onClose} aria-label="Close" title="close" style={dotStyle("#ff5f57")} />
+            ) : (
+              <span style={dotStyle("#ff5f57")} />
+            )}
+            {onMinimize ? (
+              <button onClick={onMinimize} aria-label="Minimize" title="minimize" style={dotStyle("#f5a623")} />
+            ) : (
+              <span style={dotStyle("#f5a623")} />
+            )}
+            {onFullscreen ? (
+              <button onClick={onFullscreen} aria-label="Fullscreen" title="fullscreen" style={dotStyle("#27c93f")} />
+            ) : (
+              <span style={dotStyle("#27c93f")} />
+            )}
+          </div>
+        </div>
+
+        {children}
+
+        {!minimized && footer}
+      </div>
+    </div>
+  );
+}
+
+// title bar and nav bar share one height
+export const BAR_H = 46;
+
+export function dotStyle(color: string): React.CSSProperties {
+  return {
+    width: 12,
+    height: 12,
+    borderRadius: "50%",
+    background: color,
+    border: "none",
+    cursor: "pointer",
+    padding: 0,
+    flexShrink: 0,
+    display: "inline-block",
+  };
+}
+
+// Every button on the site is this wide — nav, categories, links, read, show —
+// so rows of them read as matched blocks rather than labels of varying length.
+// It shrinks with the viewport so four fit across a phone (see --btn-w).
+export const BTN_W = "var(--btn-w)";
+
+export function navBtnStyle(disabled: boolean): React.CSSProperties {
+  return {
+    fontSize: 13,
+    letterSpacing: "0.12em",
+    color: disabled ? "var(--disabled)" : "var(--foreground)",
+    background: "none",
+    border: "1px solid var(--border)",
+    padding: "6px 0",
+    width: BTN_W,
+    textAlign: "center",
+    cursor: disabled ? "default" : "pointer",
+    fontFamily: "inherit",
+  };
+}
+
+/** the prev · counter · next bar every paging panel uses */
+export function NavBar({
+  index,
+  total,
+  onPrev,
+  onNext,
+}: {
+  index: number;
+  total: number;
+  onPrev: () => void;
+  onNext: () => void;
+}) {
+  const isFirst = index === 0;
+  const isLast = index === total - 1;
+  return (
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        minHeight: BAR_H,
+        padding: "0 14px",
+        borderTop: "1px solid var(--border)",
+        flexShrink: 0,
+        background: "var(--card)",
+      }}
+    >
+      <button className="pixel-edge" onClick={onPrev} disabled={isFirst} style={navBtnStyle(isFirst)}>
+        ← prev
+      </button>
+      <span style={{ fontSize: 13, letterSpacing: "0.12em", color: "var(--muted)" }}>
+        {index + 1} / {total}
+      </span>
+      <button className="pixel-edge" onClick={onNext} disabled={isLast} style={navBtnStyle(isLast)}>
+        next →
+      </button>
+    </div>
+  );
+}

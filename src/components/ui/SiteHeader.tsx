@@ -93,7 +93,10 @@ export function SiteHeader() {
                 top: "calc(100% + 8px)",
                 right: 0,
                 background: "var(--background)",
-                border: "1px solid var(--border)",
+                border: "var(--card-ink) solid var(--border)",
+                borderRadius: "var(--radius-btn)",
+                // so the item dividers follow the curve instead of squaring it off
+                overflow: "hidden",
                 minWidth: 120,
                 zIndex: 100,
               }}
@@ -108,7 +111,7 @@ export function SiteHeader() {
                     padding: "10px 16px",
                     borderBottom: i < navItems.length - 1 ? "1px solid var(--border)" : undefined,
                     ...labelStyle,
-                    fontSize: 11,
+                    fontSize: 12,
                   }}
                 >
                   {item.label}

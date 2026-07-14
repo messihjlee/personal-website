@@ -327,7 +327,7 @@ export function ResearchGrid({ publications }: { publications: Publication[] }) 
               style={{
                 fontSize: 10,
                 letterSpacing: "0.12em",
-                color: page === 0 ? "var(--muted)" : "var(--foreground)",
+                color: page === 0 ? "var(--disabled)" : "var(--foreground)",
                 background: "none",
                 border: "1px solid var(--border)",
                 padding: "4px 12px",
@@ -346,7 +346,7 @@ export function ResearchGrid({ publications }: { publications: Publication[] }) 
               style={{
                 fontSize: 10,
                 letterSpacing: "0.12em",
-                color: page === totalPages - 1 ? "var(--muted)" : "var(--foreground)",
+                color: page === totalPages - 1 ? "var(--disabled)" : "var(--foreground)",
                 background: "none",
                 border: "1px solid var(--border)",
                 padding: "4px 12px",

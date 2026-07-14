@@ -3,9 +3,19 @@
 import { useState, useMemo } from "react";
 import Image from "next/image";
 import type { BlogPost } from "@/types";
+import { useDraggable } from "@/hooks/useDraggable";
+import { BTN_W, CardWindow, NavBar } from "@/components/ui/CardWindow";
 
 const CATEGORIES = ["books", "daily", "art", "travel"] as const;
 type Category = (typeof CATEGORIES)[number];
+
+// category buttons are pinned to the bottom of the page; the window lives
+// between the 36px site header and that row
+const CATEGORY_BAR_BOTTOM = 24;
+const BOTTOM_RESERVED = 92;
+const WINDOW_TOP = 48;
+const WINDOW_W = 680;
+const WINDOW_H = 520;
 
 type WinState = "normal" | "minimized" | "fullscreen" | "closed";
 
@@ -20,14 +30,23 @@ export function BlogPanel({
   const [index, setIndex] = useState(0);
   const [win, setWin] = useState<WinState>("normal");
 
+  const { pos, onMouseDown, onTouchStart } = useDraggable(() => {
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    const winW = Math.min(WINDOW_W, vw - 32);
+    const winH = Math.min(WINDOW_H, vh - WINDOW_TOP - BOTTOM_RESERVED);
+    return {
+      x: Math.max(16, (vw - winW) / 2),
+      y: Math.max(WINDOW_TOP, (vh - BOTTOM_RESERVED - winH) / 2),
+    };
+  });
+
   const items = useMemo(
     () => (category ? posts.filter((p) => p.tags[0] === category) : posts),
     [posts, category],
   );
 
   const post = items[index] ?? items[0];
-  const isFirst = index === 0;
-  const isLast = index === items.length - 1;
 
   const categoryLeaders = useMemo(
     () => CATEGORIES.map((cat) => posts.find((p) => p.tags[0] === cat)).filter(Boolean) as BlogPost[],
@@ -39,129 +58,109 @@ export function BlogPanel({
     setIndex(0);
   }
 
-  if (win === "closed") {
-    return (
-      <button
-        onClick={() => setWin("normal")}
-        style={{
-          position: "fixed",
-          top: "50%",
-          left: "50%",
-          transform: "translate(-50%, -50%)",
-          fontSize: 10,
-          letterSpacing: "0.14em",
-          color: "var(--muted)",
-          background: "none",
-          border: "1px solid var(--border)",
-          padding: "6px 14px",
-          cursor: "pointer",
-          fontFamily: "inherit",
-          zIndex: 10,
-        }}
-      >
-        blog
-      </button>
-    );
-  }
+  if (!pos) return null;
 
   const isFullscreen = win === "fullscreen";
   const isMinimized = win === "minimized";
 
-  const titleBar = (
+  const categoryBar = (
     <div
       style={{
+        position: "fixed",
+        bottom: CATEGORY_BAR_BOTTOM,
+        left: 0,
+        right: 0,
         display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        padding: "9px 14px",
-        borderBottom: isMinimized ? "none" : "1px solid var(--border)",
-        flexShrink: 0,
-        background: "var(--card)",
-        userSelect: "none",
-        cursor: "default",
+        // tight enough that four buttons plus gaps clear a 320px phone
+        gap: 6,
+        padding: "0 8px",
+        justifyContent: "center",
+        zIndex: 40,
       }}
     >
-      <span
-        style={{
-          fontSize: 10,
-          letterSpacing: "0.14em",
-          color: "var(--foreground)",
-          overflow: "hidden",
-          textOverflow: "ellipsis",
-          whiteSpace: "nowrap",
-          minWidth: 0,
-          flex: 1,
-          marginRight: 12,
-        }}
-      >
-        blog · {post.title.length > 48 ? post.title.slice(0, 48) + "…" : post.title}
-      </span>
-      <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
-        <button onClick={() => setWin("closed")} aria-label="Close" title="close" style={dotStyle("#ff5f57")} />
-        <button onClick={() => setWin(isMinimized ? "normal" : "minimized")} aria-label="Minimize" title="minimize" style={dotStyle("#f5a623")} />
-        <button onClick={() => setWin(isFullscreen ? "normal" : "fullscreen")} aria-label="Fullscreen" title="fullscreen" style={dotStyle("#27c93f")} />
-      </div>
-    </div>
-  );
-
-  const windowBody = (
-    <>
-      {/* Fullscreen category filter row */}
-      {isFullscreen && !isMinimized && (
-        <div
-          style={{
-            display: "flex",
-            gap: 6,
-            padding: "8px 14px",
-            borderBottom: "1px solid var(--border)",
-            flexShrink: 0,
-            background: "var(--card)",
-            flexWrap: "wrap",
-          }}
-        >
-          {CATEGORIES.map((cat) => (
-            <button
-              key={cat}
-              onClick={() => selectCategory(cat)}
-              style={{
-                fontSize: 10,
-                letterSpacing: "0.12em",
-                color: category === cat ? "var(--foreground)" : "var(--muted)",
-                background: "none",
-                border: `1px solid ${category === cat ? "var(--foreground)" : "var(--border)"}`,
-                padding: "3px 10px",
-                cursor: "pointer",
-                fontFamily: "inherit",
-              }}
-            >
-              {cat}
-            </button>
-          ))}
-        </div>
-      )}
-
-      {isMinimized && (
-        <div style={{ padding: "56px 0", display: "flex", alignItems: "center", justifyContent: "center" }}>
+      {CATEGORIES.map((cat) => {
+        const isActive = category === cat;
+        return (
           <button
-            onClick={() => setWin("normal")}
+            key={cat}
+            className="pixel-edge"
+            onClick={() => selectCategory(cat)}
             style={{
-              fontSize: 10,
-              letterSpacing: "0.18em",
-              color: "var(--muted)",
-              background: "none",
-              border: "1px solid var(--border)",
-              padding: "8px 20px",
+              fontSize: 13,
+              letterSpacing: "0.12em",
+              color: isActive ? "var(--background)" : "var(--muted)",
+              background: isActive ? "var(--foreground)" : "var(--background)",
+              border: `1px solid ${isActive ? "var(--foreground)" : "var(--border)"}`,
+              padding: "8px 0",
+              width: BTN_W,
+              textAlign: "center",
               cursor: "pointer",
               fontFamily: "inherit",
             }}
           >
-            show
+            {cat}
           </button>
-        </div>
-      )}
+        );
+      })}
+    </div>
+  );
+
+  if (win === "closed") {
+    return (
+      <>
+        {categoryBar}
+        <button
+          className="pixel-edge"
+          onClick={() => setWin("normal")}
+          style={{
+            position: "fixed",
+            left: pos.x,
+            top: pos.y,
+            fontSize: 13,
+            letterSpacing: "0.14em",
+            color: "var(--muted)",
+            background: "none",
+            border: "1px solid var(--border)",
+            padding: "8px 0",
+            width: BTN_W,
+            textAlign: "center",
+            cursor: "pointer",
+            fontFamily: "inherit",
+            zIndex: 10,
+          }}
+        >
+          blog
+        </button>
+      </>
+    );
+  }
+
+  const style: React.CSSProperties = isFullscreen
+    ? {
+        position: "fixed",
+        top: 37,
+        left: 0,
+        right: 0,
+        bottom: BOTTOM_RESERVED - 20,
+        zIndex: 30,
+      }
+    : {
+        position: "fixed",
+        left: pos.x,
+        top: pos.y,
+        width: `min(${WINDOW_W}px, calc(100vw - 32px))`,
+        height: isMinimized
+          ? "auto"
+          : `min(${WINDOW_H}px, calc(100svh - ${WINDOW_TOP + BOTTOM_RESERVED}px))`,
+        zIndex: 10,
+      };
+
+  return (
+    <>
+      {categoryBar}
 
       {/* Preload category leader images */}
-      <div aria-hidden="true" style={{ position: "fixed", top: -9999, left: -9999, width: 680, pointerEvents: "none" }}>
+      <div aria-hidden="true" style={{ position: "fixed", top: -9999, left: -9999, width: WINDOW_W, pointerEvents: "none" }}>
         {categoryLeaders.filter((p) => p.coverImage && p.slug !== post?.slug).map((p) => (
           <div key={p.slug} style={{ position: "relative", height: 300 }}>
             <Image src={p.coverImage!} alt="" fill sizes="(max-width: 680px) 100vw, 680px" priority />
@@ -169,11 +168,50 @@ export function BlogPanel({
         ))}
       </div>
 
-      {!isMinimized && (
-        <>
-          <div style={{ flex: 1, overflowY: "auto", display: "flex", flexDirection: "column" }}>
+      <CardWindow
+        label="blog"
+        subtitle={post.title.length > 40 ? post.title.slice(0, 40) + "…" : post.title}
+        minimized={isMinimized}
+        fullscreen={isFullscreen}
+        onClose={() => setWin("closed")}
+        onMinimize={() => setWin(isMinimized ? "normal" : "minimized")}
+        onFullscreen={() => setWin(isFullscreen ? "normal" : "fullscreen")}
+        dragProps={{ onMouseDown, onTouchStart }}
+        style={style}
+        footer={
+          <NavBar
+            index={index}
+            total={items.length}
+            onPrev={() => setIndex((i) => Math.max(0, i - 1))}
+            onNext={() => setIndex((i) => Math.min(items.length - 1, i + 1))}
+          />
+        }
+      >
+        {isMinimized ? (
+          <div style={{ padding: "56px 0", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <button
+              className="pixel-edge"
+              onClick={() => setWin("normal")}
+              style={{
+                fontSize: 13,
+                letterSpacing: "0.18em",
+                color: "var(--muted)",
+                background: "none",
+                border: "1px solid var(--border)",
+                padding: "10px 0",
+                width: BTN_W,
+                textAlign: "center",
+                cursor: "pointer",
+                fontFamily: "inherit",
+              }}
+            >
+              show
+            </button>
+          </div>
+        ) : (
+          <div style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column", overflow: "hidden" }}>
             {post.coverImage && (
-              <div style={{ position: "relative", width: "100%", aspectRatio: "16/7", flexShrink: 0 }}>
+              <div style={{ position: "relative", width: "100%", flex: 1, minHeight: 0 }}>
                 <Image
                   src={post.coverImage}
                   alt={post.title}
@@ -184,7 +222,16 @@ export function BlogPanel({
                 />
               </div>
             )}
-            <div style={{ padding: "28px 28px 24px", display: "flex", flexDirection: "column", gap: 12 }}>
+            <div
+              style={{
+                padding: "20px 28px 22px",
+                display: "flex",
+                flexDirection: "column",
+                gap: 10,
+                flexShrink: 0,
+                background: "var(--background)",
+              }}
+            >
               <time style={{ fontSize: 10, letterSpacing: "0.12em", color: "var(--muted)" }}>
                 {new Date(post.date).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}
               </time>
@@ -196,26 +243,44 @@ export function BlogPanel({
                   color: "var(--foreground)",
                   margin: 0,
                   fontFamily: "inherit",
+                  display: "-webkit-box",
+                  WebkitLineClamp: 2,
+                  WebkitBoxOrient: "vertical",
+                  overflow: "hidden",
                 }}
               >
                 {post.title}
               </h2>
               {post.description && (
-                <p style={{ fontSize: 14, lineHeight: 1.75, color: "var(--muted)", margin: 0 }}>
+                <p
+                  style={{
+                    fontSize: 14,
+                    lineHeight: 1.7,
+                    color: "var(--muted)",
+                    margin: 0,
+                    display: "-webkit-box",
+                    WebkitLineClamp: 2,
+                    WebkitBoxOrient: "vertical",
+                    overflow: "hidden",
+                  }}
+                >
                   {post.description}
                 </p>
               )}
               <button
+                className="pixel-edge"
                 onClick={() => onOpen?.(post.slug)}
                 style={{
-                  fontSize: 10,
+                  fontSize: 13,
                   letterSpacing: "0.14em",
                   color: "var(--foreground)",
                   background: "none",
                   border: "1px solid var(--border)",
-                  padding: "6px 14px",
+                  padding: "8px 0",
+                  width: BTN_W,
+                  textAlign: "center",
                   alignSelf: "flex-start",
-                  marginTop: 4,
+                  marginTop: 2,
                   cursor: "pointer",
                   fontFamily: "inherit",
                 }}
@@ -224,146 +289,8 @@ export function BlogPanel({
               </button>
             </div>
           </div>
-
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              padding: "9px 14px",
-              borderTop: "1px solid var(--border)",
-              flexShrink: 0,
-              background: "var(--card)",
-            }}
-          >
-            <button onClick={() => setIndex((i) => Math.max(0, i - 1))} disabled={isFirst} style={navBtnStyle(isFirst)}>
-              ← prev
-            </button>
-            <span style={{ fontSize: 10, letterSpacing: "0.12em", color: "var(--muted)" }}>
-              {index + 1} / {items.length}
-            </span>
-            <button onClick={() => setIndex((i) => Math.min(items.length - 1, i + 1))} disabled={isLast} style={navBtnStyle(isLast)}>
-              next →
-            </button>
-          </div>
-        </>
-      )}
+        )}
+      </CardWindow>
     </>
   );
-
-  if (isFullscreen) {
-    return (
-      <div
-        style={{
-          position: "fixed",
-          top: 37,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          display: "flex",
-          flexDirection: "column",
-          background: "var(--background)",
-          border: "1px solid var(--border)",
-          zIndex: 50,
-        }}
-      >
-        {titleBar}
-        {windowBody}
-      </div>
-    );
-  }
-
-  return (
-    <div
-      style={{
-        position: "fixed",
-        top: "50%",
-        left: "50%",
-        transform: "translate(-50%, -50%)",
-        width: "min(680px, calc(100vw - 32px))",
-        display: "flex",
-        flexDirection: "column",
-        zIndex: 10,
-      }}
-    >
-      {/* Trapezoid category tabs */}
-      <div style={{ display: "flex", alignItems: "flex-end", gap: 2 }}>
-        {CATEGORIES.map((cat) => {
-          const isActive = category === cat;
-          return (
-            <div
-              key={cat}
-              style={{
-                clipPath: "polygon(0% 0%, calc(100% - 14px) 0%, 100% 100%, 0% 100%)",
-                background: "var(--border)",
-                position: "relative",
-                zIndex: isActive ? 1 : 0,
-                marginBottom: "-1px",
-              }}
-            >
-              <button
-                onClick={() => selectCategory(cat)}
-                style={{
-                  display: "block",
-                  clipPath: "polygon(1px 1px, calc(100% - 15px) 1px, calc(100% - 1px) 100%, 1px 100%)",
-                  background: isActive ? "var(--card)" : "var(--background)",
-                  color: "var(--foreground)",
-                  padding: "5px 28px 6px 14px",
-                  fontSize: 10,
-                  letterSpacing: "0.12em",
-                  fontFamily: "inherit",
-                  border: "none",
-                  cursor: "pointer",
-                  whiteSpace: "nowrap",
-                  width: "100%",
-                }}
-              >
-                {cat}
-              </button>
-            </div>
-          );
-        })}
-      </div>
-
-      {/* Window box */}
-      <div
-        style={{
-          height: "min(520px, calc(100svh - 140px))",
-          display: "flex",
-          flexDirection: "column",
-          border: "1px solid var(--border)",
-          background: "var(--background)",
-        }}
-      >
-        {titleBar}
-        {windowBody}
-      </div>
-    </div>
-  );
-}
-
-function dotStyle(color: string): React.CSSProperties {
-  return {
-    width: 12,
-    height: 12,
-    borderRadius: "50%",
-    background: color,
-    border: "none",
-    cursor: "pointer",
-    padding: 0,
-    flexShrink: 0,
-  };
-}
-
-function navBtnStyle(disabled: boolean): React.CSSProperties {
-  return {
-    fontSize: 10,
-    letterSpacing: "0.12em",
-    color: disabled ? "var(--muted)" : "var(--foreground)",
-    background: "none",
-    border: "1px solid var(--border)",
-    padding: "4px 12px",
-    cursor: disabled ? "default" : "pointer",
-    fontFamily: "inherit",
-  };
 }

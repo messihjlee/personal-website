@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { useDraggable } from "@/hooks/useDraggable";
+import { BTN_W, CardWindow, NavBar } from "@/components/ui/CardWindow";
 
 interface Section {
   title: string;
@@ -9,26 +11,50 @@ interface Section {
 
 type WinState = "normal" | "minimized" | "fullscreen" | "closed";
 
+const WINDOW_W = 680;
+// sized to the longest section (~120 words), so the shorter ones don't sit in a
+// half-empty pane; the body scrolls if a section ever outgrows it
+const WINDOW_H = 420;
+const WINDOW_TOP = 48;
+const BOTTOM_RESERVED = 48;
+
 export function AboutPanel({ sections }: { sections: Section[] }) {
   const [index, setIndex] = useState(0);
   const [win, setWin] = useState<WinState>("normal");
 
-  const isFirst = index === 0;
-  const isLast = index === sections.length - 1;
+  const { pos, onMouseDown, onTouchStart } = useDraggable(() => {
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    const winW = Math.min(WINDOW_W, vw - 32);
+    const winH = Math.min(WINDOW_H, vh - WINDOW_TOP - BOTTOM_RESERVED);
+    return {
+      x: Math.max(16, (vw - winW) / 2),
+      y: Math.max(WINDOW_TOP, (vh - BOTTOM_RESERVED - winH) / 2),
+    };
+  });
+
+  if (!pos) return null;
 
   if (win === "closed") {
     return (
       <button
+        className="pixel-edge"
         onClick={() => setWin("normal")}
         style={{
-          fontSize: 10,
+          position: "fixed",
+          left: pos.x,
+          top: pos.y,
+          fontSize: 13,
           letterSpacing: "0.14em",
           color: "var(--muted)",
           background: "none",
           border: "1px solid var(--border)",
-          padding: "6px 14px",
+          padding: "8px 0",
+          width: BTN_W,
+          textAlign: "center",
           cursor: "pointer",
           fontFamily: "inherit",
+          zIndex: 10,
         }}
       >
         about
@@ -39,94 +65,51 @@ export function AboutPanel({ sections }: { sections: Section[] }) {
   const isFullscreen = win === "fullscreen";
   const isMinimized = win === "minimized";
 
-  const windowStyle: React.CSSProperties = isFullscreen
-    ? {
-        position: "fixed",
-        top: 37,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        display: "flex",
-        flexDirection: "column",
-        background: "var(--background)",
-        border: "1px solid var(--border)",
-        zIndex: 50,
-      }
+  const style: React.CSSProperties = isFullscreen
+    ? { position: "fixed", top: 37, left: 0, right: 0, bottom: 0, zIndex: 50 }
     : {
-        width: "100%",
-        maxWidth: 680,
-        display: "flex",
-        flexDirection: "column",
-        border: "1px solid var(--border)",
-        background: "var(--background)",
+        position: "fixed",
+        left: pos.x,
+        top: pos.y,
+        width: `min(${WINDOW_W}px, calc(100vw - 32px))`,
+        height: isMinimized
+          ? "auto"
+          : `min(${WINDOW_H}px, calc(100svh - ${Math.round(pos.y) + 24}px))`,
+        zIndex: 10,
       };
 
   return (
-    <div style={windowStyle}>
-      {/* Title bar */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          padding: "9px 14px",
-          borderBottom: isMinimized ? "none" : "1px solid var(--border)",
-          flexShrink: 0,
-          background: "var(--card)",
-          userSelect: "none",
-        }}
-      >
-        <span
-          style={{
-            fontSize: 10,
-            letterSpacing: "0.14em",
-            color: "var(--foreground)",
-          }}
-        >
-          about · {sections[index].title}
-        </span>
-
-        {/* Window controls — x, hide, fullscreen */}
-        <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
-          <button
-            onClick={() => setWin("closed")}
-            aria-label="Close"
-            title="close"
-            style={dotStyle("#ff5f57")}
-          />
-          <button
-            onClick={() => setWin(isMinimized ? "normal" : "minimized")}
-            aria-label="Minimize"
-            title="minimize"
-            style={dotStyle("#f5a623")}
-          />
-          <button
-            onClick={() => setWin(isFullscreen ? "normal" : "fullscreen")}
-            aria-label="Fullscreen"
-            title="fullscreen"
-            style={dotStyle("#27c93f")}
-          />
-        </div>
-      </div>
-
-      {isMinimized && (
-        <div
-          style={{
-            padding: "56px 0",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
+    <CardWindow
+      label="about"
+      subtitle={sections[index].title}
+      minimized={isMinimized}
+      fullscreen={isFullscreen}
+      onClose={() => setWin("closed")}
+      onMinimize={() => setWin(isMinimized ? "normal" : "minimized")}
+      onFullscreen={() => setWin(isFullscreen ? "normal" : "fullscreen")}
+      dragProps={{ onMouseDown, onTouchStart }}
+      style={style}
+      footer={
+        <NavBar
+          index={index}
+          total={sections.length}
+          onPrev={() => setIndex((i) => Math.max(0, i - 1))}
+          onNext={() => setIndex((i) => Math.min(sections.length - 1, i + 1))}
+        />
+      }
+    >
+      {isMinimized ? (
+        <div style={{ padding: "56px 0", display: "flex", alignItems: "center", justifyContent: "center" }}>
           <a
+            className="pixel-edge"
             href="/found"
             style={{
-              fontSize: 10,
+              fontSize: 13,
               letterSpacing: "0.18em",
               color: "var(--muted)",
               background: "none",
               border: "1px solid var(--border)",
-              padding: "8px 20px",
+              padding: "10px 24px",
               cursor: "pointer",
               fontFamily: "inherit",
               textDecoration: "none",
@@ -136,86 +119,31 @@ export function AboutPanel({ sections }: { sections: Section[] }) {
             you&apos;ve found me
           </a>
         </div>
-      )}
-
-      {!isMinimized && (
-        <>
-          {/* Content */}
-          <div
-            style={{
-              padding: "32px 28px",
-              flex: 1,
-              overflowY: "auto",
-              fontSize: 15,
-              lineHeight: 1.85,
-              color: "var(--foreground)",
-            }}
-          >
-            {sections.map((s, i) => (
-              <div key={s.title} style={{ display: i === index ? "block" : "none" }}>
-                {s.rendered}
-              </div>
-            ))}
-          </div>
-
-          {/* Footer nav */}
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              padding: "9px 14px",
-              borderTop: "1px solid var(--border)",
-              flexShrink: 0,
-              background: "var(--card)",
-            }}
-          >
-            <button
-              onClick={() => setIndex((i) => Math.max(0, i - 1))}
-              disabled={isFirst}
-              style={navBtnStyle(isFirst)}
+      ) : (
+        <div
+          style={{
+            padding: "28px 28px 24px",
+            flex: 1,
+            minHeight: 0,
+            overflowY: "auto",
+            display: "flex",
+            fontSize: 15,
+            lineHeight: 1.85,
+            color: "var(--foreground)",
+          }}
+        >
+          {sections.map((s, i) => (
+            <div
+              key={s.title}
+              // margin auto rather than justify/align center: a section taller
+              // than the pane still scrolls from its top instead of being clipped
+              style={{ display: i === index ? "block" : "none", margin: "auto", width: "100%" }}
             >
-              ← prev
-            </button>
-            <span style={{ fontSize: 10, letterSpacing: "0.12em", color: "var(--muted)" }}>
-              {index + 1} / {sections.length}
-            </span>
-            <button
-              onClick={() => setIndex((i) => Math.min(sections.length - 1, i + 1))}
-              disabled={isLast}
-              style={navBtnStyle(isLast)}
-            >
-              next →
-            </button>
-          </div>
-        </>
+              {s.rendered}
+            </div>
+          ))}
+        </div>
       )}
-    </div>
+    </CardWindow>
   );
-}
-
-function dotStyle(color: string): React.CSSProperties {
-  return {
-    width: 12,
-    height: 12,
-    borderRadius: "50%",
-    background: color,
-    border: "none",
-    cursor: "pointer",
-    padding: 0,
-    flexShrink: 0,
-  };
-}
-
-function navBtnStyle(disabled: boolean): React.CSSProperties {
-  return {
-    fontSize: 10,
-    letterSpacing: "0.12em",
-    color: disabled ? "var(--muted)" : "var(--foreground)",
-    background: "none",
-    border: "1px solid var(--border)",
-    padding: "4px 12px",
-    cursor: disabled ? "default" : "pointer",
-    fontFamily: "inherit",
-  };
 }
