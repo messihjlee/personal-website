@@ -140,6 +140,44 @@ export function navBtnStyle(disabled: boolean): React.CSSProperties {
   };
 }
 
+/**
+ * The wider action button: the same hairline, type and curve as navBtnStyle,
+ * but sized to its label instead of the fixed BTN_W — for the prose-length
+ * calls to action ("deal again", "fund the research →") that can't shrink into
+ * a matched block. Pair with .pixel-edge, like every other button on the site.
+ */
+export const actionBtnStyle: React.CSSProperties = {
+  fontFamily: "inherit",
+  fontSize: 13,
+  letterSpacing: "0.12em",
+  color: "var(--foreground)",
+  background: "none",
+  border: "1px solid var(--border)",
+  padding: "8px 22px",
+  textAlign: "center",
+  cursor: "pointer",
+};
+
+/** the same button, stepped back so it reads as the secondary of a pair */
+export const actionBtnGhost: React.CSSProperties = {
+  border: "1px solid transparent",
+  color: "var(--muted)",
+};
+
+/** the bar a panel's actions sit in — the footer twin of the title bar */
+export const footerBarStyle: React.CSSProperties = {
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  gap: 10,
+  flexWrap: "wrap",
+  minHeight: BAR_H,
+  padding: "8px 14px",
+  borderTop: "1px solid var(--border)",
+  flexShrink: 0,
+  background: "var(--card)",
+};
+
 /** the prev · counter · next bar every paging panel uses */
 export function NavBar({
   index,
