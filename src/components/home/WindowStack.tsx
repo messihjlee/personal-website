@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { PokerGame } from "@/components/poker/PokerGame";
+import { PLAY_PARAM } from "@/lib/constants";
 
 interface StackItem {
   href: string;
@@ -122,6 +123,18 @@ export function WindowStack() {
   useEffect(() => {
     const raf = requestAnimationFrame(() => setMounted(true));
     return () => cancelAnimationFrame(raf);
+  }, []);
+
+  // "play again" on the donate page sends you back here with ?play=1 — sit the
+  // player straight back down at the table. Read off location rather than
+  // useSearchParams, which would drag this static page behind a suspense
+  // boundary for a param only ever read on the client.
+  useEffect(() => {
+    if (!new URLSearchParams(window.location.search).has(PLAY_PARAM)) return;
+    setGameOpen(true);
+    // strip the param back off, so leaving the table leaves a clean url that
+    // won't deal you back in on a reload
+    window.history.replaceState(null, "", window.location.pathname);
   }, []);
 
   // reflow the arrangement (dice / 3-over-2 / single row) with viewport width

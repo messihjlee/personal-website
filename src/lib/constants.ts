@@ -15,6 +15,12 @@ export const navLinks = [
   { href: "/", label: "Home" },
 ] as const;
 
+// The poker table is an overlay on the home page rather than a route of its
+// own, so there's no url to link back to. This query param is the way in: the
+// home page opens the table on arrival and then strips it back off the url.
+export const PLAY_PARAM = "play";
+export const PLAY_HREF = `/?${PLAY_PARAM}=1`;
+
 export const socialLinks = {
   github: "https://github.com/messihjlee",
   email: "mailto:messihjlee@gmail.com",
