@@ -3,15 +3,30 @@
 import Link from "next/link";
 import { useState, useRef, useEffect } from "react";
 import { usePathname } from "next/navigation";
+import { Home } from "lucide-react";
 import { ThemeToggle } from "./ThemeToggle";
 
+// Home isn't here: it's an icon control of its own, next to the theme toggle.
 const NAV = [
-  { href: "/",         label: "home"     },
   { href: "/blog",     label: "blog"     },
   { href: "/about",    label: "about"    },
   { href: "/research", label: "research" },
   { href: "/contact",  label: "contact"  },
 ];
+
+// the header's icon controls share one hit box — see ThemeToggle
+const iconBtnStyle: React.CSSProperties = {
+  display: "inline-flex",
+  alignItems: "center",
+  justifyContent: "center",
+  background: "none",
+  border: "none",
+  color: "var(--foreground)",
+  width: 24,
+  height: 24,
+  padding: 0,
+  cursor: "pointer",
+};
 
 const labelStyle: React.CSSProperties = {
   fontSize: 10,
@@ -120,6 +135,16 @@ export function SiteHeader() {
             </div>
           )}
         </div>
+
+        {/* Home sits between the nav dropdown and the theme toggle, an icon
+            control of its own rather than a dropdown entry. It's dropped on the
+            home page itself, the same way the dropdown leaves out the page
+            you're already on. */}
+        {pathname !== "/" && (
+          <Link href="/" aria-label="Home" title="home" style={iconBtnStyle}>
+            <Home size={16} strokeWidth={1.75} />
+          </Link>
+        )}
 
         <ThemeToggle />
       </div>
