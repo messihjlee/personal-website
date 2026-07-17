@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { Client } from "@notionhq/client";
 import { NotionToMarkdown } from "notion-to-md";
 import type { BlogPost } from "@/types";
@@ -127,9 +128,12 @@ export async function getAllPosts(): Promise<BlogPost[]> {
   return posts;
 }
 
-export async function getPostBySlug(
-  slug: string
-): Promise<BlogPost | null> {
+// Wrapped in React's cache(): every post is fetched twice per render otherwise,
+// once by generateMetadata and once by the page itself. Next dedupes fetch()
+// automatically, but the Notion SDK ships its own http client and never touches
+// the patched global — so each call went to the network, doubling the request
+// count and the rate-limit pressure. cache() dedupes for the render's lifetime.
+export const getPostBySlug = cache(async (slug: string): Promise<BlogPost | null> => {
   const notion = getClient();
 
   const filterResponse = await notion.databases.query({
@@ -202,7 +206,7 @@ export async function getPostBySlug(
   }
 
   return pageToPost(page, safeContent);
-}
+});
 
 export async function getAllSlugs(): Promise<string[]> {
   const notion = getClient();
