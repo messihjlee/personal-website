@@ -1,14 +1,26 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { PlayingCard } from "./PlayingCard";
 import { SiteHeader } from "@/components/ui/SiteHeader";
-import { BTN_W } from "@/components/ui/CardWindow";
-import { compareHands, deal, evaluateHand, type Card } from "@/lib/poker";
+import { actionBtnGhost, actionBtnStyle, BTN_W } from "@/components/ui/CardWindow";
+import { bestHand, compareResults, dealHoldem, type Card } from "@/lib/poker";
 
-type Phase = "dealing" | "betting" | "reveal" | "result";
+// Heads-up hold'em against the house. A hand runs: two hole cards each plus the
+// flop → check → turn → check → river → showdown. Folding at either check ends
+// the hand where it stands, with no showdown.
+type Phase = "dealing" | "betting" | "river" | "showdown" | "result";
 type Outcome = "win" | "lose" | "push";
+type Side = "opponent" | "board" | "player";
+
+const FLOP = 3; // board cards face-up when the hand opens
+const RIVER = 5; // ...and once both checks are in
+
+// Hole cards land first, the board after; within a row each card follows the
+// one before it. Positive y is the player's side of the table.
+const ENTER_Y: Record<Side, number> = { player: 40, opponent: -40, board: -18 };
+const ENTER_DELAY: Record<Side, number> = { player: 0, opponent: 120, board: 260 };
 
 interface PokerGameProps {
   onClose: () => void;
@@ -16,48 +28,45 @@ interface PokerGameProps {
 
 export function PokerGame({ onClose }: PokerGameProps) {
   const router = useRouter();
+  const [hands, setHands] = useState(dealHoldem);
+  // bumped once per hand — it keys the table, so a new deal replays the entrance
+  const [handNo, setHandNo] = useState(0);
   const [phase, setPhase] = useState<Phase>("dealing");
-  const [dealt, setDealt] = useState(false);
+  const [boardShown, setBoardShown] = useState(FLOP);
   const [folded, setFolded] = useState(false);
-  const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
 
-  const hands = useMemo(() => deal(), []);
-  const { player, opponent } = hands;
+  const { player, opponent, board } = hands;
+
+  // each side plays the best five of the seven it can see
+  const playerBest = useMemo(() => bestHand([...player, ...board]), [player, board]);
+  const opponentBest = useMemo(() => bestHand([...opponent, ...board]), [opponent, board]);
 
   const outcome: Outcome = useMemo(() => {
-    const cmp = compareHands(player, opponent);
+    const cmp = compareResults(playerBest.result, opponentBest.result);
     return cmp > 0 ? "win" : cmp < 0 ? "lose" : "push";
-  }, [player, opponent]);
+  }, [playerBest, opponentBest]);
 
-  const playerEval = useMemo(() => evaluateHand(player), [player]);
-  const opponentEval = useMemo(() => evaluateHand(opponent), [opponent]);
-
-  const addTimer = (fn: () => void, ms: number) => {
-    timers.current.push(setTimeout(fn, ms));
-  };
-
-  // deal in, then open betting
+  // the beats the player doesn't drive: the deal, and the run to the showdown
   useEffect(() => {
-    const raf = requestAnimationFrame(() => setDealt(true));
-    addTimer(() => setPhase("betting"), 1050);
-    return () => {
-      cancelAnimationFrame(raf);
-      timers.current.forEach(clearTimeout);
-      timers.current = [];
-    };
-  }, []);
-
-  // after the reveal flip settles, show the result
-  useEffect(() => {
-    if (phase !== "reveal") return;
-    addTimer(() => setPhase("result"), 1500);
+    if (phase === "dealing") {
+      const t = setTimeout(() => setPhase("betting"), 1050);
+      return () => clearTimeout(t);
+    }
+    if (phase === "river") {
+      const t = setTimeout(() => setPhase("showdown"), 1300);
+      return () => clearTimeout(t);
+    }
+    if (phase === "showdown") {
+      const t = setTimeout(() => setPhase("result"), 1500);
+      return () => clearTimeout(t);
+    }
   }, [phase]);
 
   // a loss (or a fold) funnels to the donation page after a beat
   useEffect(() => {
-    if (phase === "result" && (folded || outcome === "lose")) {
-      addTimer(() => router.push("/donate"), 3000);
-    }
+    if (phase !== "result" || (!folded && outcome !== "lose")) return;
+    const t = setTimeout(() => router.push("/donate"), 3000);
+    return () => clearTimeout(t);
   }, [phase, outcome, folded, router]);
 
   useEffect(() => {
@@ -68,41 +77,60 @@ export function PokerGame({ onClose }: PokerGameProps) {
     return () => window.removeEventListener("keydown", onKey);
   }, [onClose]);
 
+  // a check buys the next street; the river asks nothing back, it just runs
+  function check() {
+    const next = boardShown + 1;
+    setBoardShown(next);
+    if (next === RIVER) setPhase("river");
+  }
+
+  function fold() {
+    setFolded(true);
+    setPhase("result");
+  }
+
+  // same table, fresh cards — winning shouldn't cost you your seat
+  function dealAgain() {
+    setHands(dealHoldem());
+    setHandNo((n) => n + 1);
+    setBoardShown(FLOP);
+    setFolded(false);
+    setPhase("dealing");
+  }
+
   const finalOutcome: Outcome = folded ? "lose" : outcome;
   const showResult = phase === "result";
-  const playerWon = finalOutcome === "win";
-  const opponentWon = finalOutcome === "lose";
-  // you see your own hand as soon as it's dealt; the opponent's stays hidden
-  // until the showdown
-  const opponentFaceUp = phase === "reveal" || phase === "result";
-  const playerFaceUp = phase !== "dealing";
+  const dealing = phase === "dealing";
+  // fold and there's no showdown: nothing turns over and no hand gets named
+  const showdown = !folded && (phase === "showdown" || phase === "result");
+  const named = showResult && !folded;
+  const playerWon = named && finalOutcome === "win";
+  const opponentWon = named && finalOutcome === "lose";
 
-  function renderRow(
-    cards: Card[],
-    side: "opponent" | "player",
-    faceUp: boolean,
-    won: boolean,
-  ) {
+  // at the showdown the winner's five playing cards lift — board cards
+  // included, since they're part of the hand too
+  const winners = useMemo(() => {
+    if (!named) return new Set<Card>();
+    if (finalOutcome === "win") return new Set(playerBest.cards);
+    if (finalOutcome === "lose") return new Set(opponentBest.cards);
+    return new Set([...playerBest.cards, ...opponentBest.cards]);
+  }, [named, finalOutcome, playerBest, opponentBest]);
+
+  function renderRow(cards: Card[], side: Side, isFaceUp: (i: number) => boolean) {
     return (
       <div className={`poker-row poker-row--${side}`}>
         {cards.map((card, i) => (
           <div
             key={i}
             className="poker-slot"
-            style={{
-              transitionDelay: dealt ? `${i * 90 + (side === "opponent" ? 120 : 0)}ms` : "0ms",
-              opacity: dealt ? 1 : 0,
-              transform: dealt
-                ? "translateY(0)"
-                : `translateY(${side === "opponent" ? -40 : 40}px)`,
-            }}
+            style={
+              {
+                animationDelay: `${i * 90 + ENTER_DELAY[side]}ms`,
+                "--deal-from": `${ENTER_Y[side]}px`,
+              } as React.CSSProperties
+            }
           >
-            <PlayingCard
-              card={card}
-              faceUp={faceUp}
-              highlight={showResult && won}
-              style={{ transitionDelay: faceUp ? `${i * 70}ms` : "0ms" }}
-            />
+            <PlayingCard card={card} faceUp={isFaceUp(i)} highlight={winners.has(card)} />
           </div>
         ))}
       </div>
@@ -130,64 +158,64 @@ export function PokerGame({ onClose }: PokerGameProps) {
       {/* same centered logo header as every other page */}
       <SiteHeader />
 
+      <button className="pixel-edge" onClick={onClose} style={leaveStyle}>
+        ← leave table
+      </button>
+
       {/* opponent side */}
       <div style={{ textAlign: "center", width: "100%", minHeight: 22 }}>
-        <HandLabel hand={showResult ? opponentEval.name : undefined} won={showResult && opponentWon} />
+        <HandLabel hand={named ? opponentBest.result.name : undefined} won={opponentWon} />
       </div>
 
       {/* the tilted table — centered in the middle of the screen */}
       <div style={{ perspective: 1100, width: "100%", display: "flex", alignItems: "center" }}>
         <div
+          key={handNo}
           style={{
             width: "100%",
             transformStyle: "preserve-3d",
             transform: "rotateX(14deg)",
             display: "flex",
             flexDirection: "column",
-            gap: "clamp(24px, 6vh, 64px)",
+            gap: "clamp(16px, 4vh, 44px)",
           }}
         >
-          {renderRow(opponent, "opponent", opponentFaceUp, opponentWon)}
-          {renderRow(player, "player", playerFaceUp, playerWon)}
+          {renderRow(opponent, "opponent", () => showdown)}
+          {renderRow(board, "board", (i) => !dealing && i < boardShown)}
+          {renderRow(player, "player", () => !dealing)}
         </div>
       </div>
 
       {/* player side + HUD */}
       <div style={{ textAlign: "center", width: "100%", minHeight: 132 }}>
-        <HandLabel hand={showResult ? playerEval.name : undefined} won={showResult && playerWon} />
+        <HandLabel hand={named ? playerBest.result.name : undefined} won={playerWon} />
 
-        {phase === "dealing" && (
-          <p style={hudMuted}>dealing…</p>
-        )}
+        {dealing && <p style={hudMuted}>dealing…</p>}
 
         {phase === "betting" && (
-          <div style={{ marginTop: 10 }}>
-            <div style={{ display: "flex", gap: 10, justifyContent: "center", marginTop: 12 }}>
-              <button
-                className="pixel-edge"
-                onClick={() => {
-                  setFolded(true);
-                  setPhase("result");
-                }}
-                style={{ ...chipStyle, padding: "8px 0", width: BTN_W }}
-              >
-                fold
-              </button>
-              <button
-                className="pixel-edge"
-                onClick={() => setPhase("reveal")}
-                style={{ ...chipStyle, padding: "8px 0", width: BTN_W }}
-              >
-                check
-              </button>
-            </div>
+          <div style={{ display: "flex", gap: 10, justifyContent: "center", marginTop: 22 }}>
+            <button
+              className="pixel-edge"
+              onClick={fold}
+              style={{ ...actionBtnStyle, padding: "8px 0", width: BTN_W }}
+            >
+              fold
+            </button>
+            <button
+              className="pixel-edge"
+              onClick={check}
+              style={{ ...actionBtnStyle, padding: "8px 0", width: BTN_W }}
+            >
+              check
+            </button>
           </div>
         )}
 
-        {phase === "reveal" && <p style={hudMuted}>showdown…</p>}
+        {phase === "river" && <p style={hudMuted}>river…</p>}
+        {phase === "showdown" && <p style={hudMuted}>showdown…</p>}
 
         {showResult && (
-          <ResultPanel outcome={finalOutcome} onClose={onClose} router={router} />
+          <ResultPanel outcome={finalOutcome} onDealAgain={dealAgain} router={router} />
         )}
       </div>
     </div>
@@ -212,11 +240,11 @@ function HandLabel({ hand, won }: { hand?: string; won?: boolean }) {
 
 function ResultPanel({
   outcome,
-  onClose,
+  onDealAgain,
   router,
 }: {
   outcome: Outcome;
-  onClose: () => void;
+  onDealAgain: () => void;
   router: ReturnType<typeof useRouter>;
 }) {
   if (outcome === "lose") {
@@ -227,7 +255,7 @@ function ResultPanel({
         <button
           className="pixel-edge"
           onClick={() => router.push("/donate")}
-          style={{ ...chipStyle, marginTop: 12 }}
+          style={{ ...actionBtnStyle, marginTop: 12 }}
         >
           continue →
         </button>
@@ -239,7 +267,9 @@ function ResultPanel({
       <div style={{ marginTop: 12 }}>
         <p style={hudTitle}>push — it&apos;s a tie</p>
         <div style={{ display: "flex", gap: 10, justifyContent: "center", marginTop: 10 }}>
-          <button className="pixel-edge" onClick={onClose} style={chipStyle}>deal again</button>
+          <button className="pixel-edge" onClick={onDealAgain} style={actionBtnStyle}>
+            deal again
+          </button>
         </div>
       </div>
     );
@@ -247,12 +277,22 @@ function ResultPanel({
   return (
     <div style={{ marginTop: 12 }}>
       <p style={hudTitle}>you win 🎉</p>
-      <div style={{ display: "flex", gap: 10, justifyContent: "center", marginTop: 10, flexWrap: "wrap" }}>
-        <button onClick={onClose} style={chipStyle}>deal again</button>
+      <div
+        style={{
+          display: "flex",
+          gap: 10,
+          justifyContent: "center",
+          marginTop: 10,
+          flexWrap: "wrap",
+        }}
+      >
+        <button className="pixel-edge" onClick={onDealAgain} style={actionBtnStyle}>
+          deal again
+        </button>
         <button
           className="pixel-edge"
           onClick={() => router.push("/donate")}
-          style={{ ...chipStyle, ...chipGhost }}
+          style={{ ...actionBtnStyle, ...actionBtnGhost }}
         >
           fund the research anyway →
         </button>
@@ -275,21 +315,15 @@ const hudTitle: React.CSSProperties = {
   fontWeight: 700,
 };
 
-// the bet and result buttons are the site's button: same type, hairline and
-// curve as nav, research and blog (the curve comes from .pixel-edge)
-const chipStyle: React.CSSProperties = {
-  fontFamily: "inherit",
-  fontSize: 13,
-  letterSpacing: "0.12em",
-  color: "var(--foreground)",
-  background: "none",
-  border: "1px solid var(--border)",
-  padding: "8px 22px",
-  textAlign: "center",
-  cursor: "pointer",
-};
-
-const chipGhost: React.CSSProperties = {
-  border: "1px solid transparent",
+// The table is a full-screen overlay with no chrome of its own, and "deal
+// again" now keeps you in your seat — so this is the way back out (as is Esc).
+const leaveStyle: React.CSSProperties = {
+  ...actionBtnStyle,
+  position: "fixed",
+  top: 8,
+  left: 12,
+  zIndex: 101,
+  fontSize: 11,
+  padding: "5px 12px",
   color: "var(--muted)",
 };

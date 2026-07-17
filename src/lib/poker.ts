@@ -1,5 +1,6 @@
-// Pure five-card poker logic — no React, no DOM. Kept framework-free so it
-// can be unit-tested and reused anywhere.
+// Pure poker logic — no React, no DOM. Kept framework-free so it can be
+// unit-tested and reused anywhere. Five-card evaluation is the engine; a
+// hold'em deal and best-of-seven selection sit on top of it.
 //
 // Card sprite mapping (see public/cards/card-faces.png, a 13×4 grid):
 //   suit: 0=Hearts, 1=Diamonds, 2=Spades, 3=Clubs   (row)
@@ -44,10 +45,21 @@ export function shuffle<T>(arr: T[]): T[] {
   return arr;
 }
 
-// Deal two five-card hands off a freshly shuffled deck.
-export function deal(): { player: Card[]; opponent: Card[] } {
+export interface HoldemDeal {
+  player: Card[]; // two hole cards
+  opponent: Card[]; // two hole cards
+  board: Card[]; // five community cards: three flop, then turn, then river
+}
+
+// Deal a hold'em hand off a freshly shuffled deck. The whole board is dealt up
+// front and the UI turns it over a street at a time.
+export function dealHoldem(): HoldemDeal {
   const deck = shuffle(makeDeck());
-  return { player: deck.slice(0, 5), opponent: deck.slice(5, 10) };
+  return {
+    player: deck.slice(0, 2),
+    opponent: deck.slice(2, 4),
+    board: deck.slice(4, 9),
+  };
 }
 
 export enum HandRank {
@@ -140,6 +152,43 @@ export function compareResults(a: HandResult, b: HandResult): number {
   return 0;
 }
 
-export function compareHands(a: Card[], b: Card[]): number {
-  return compareResults(evaluateHand(a), evaluateHand(b));
+export interface BestHand {
+  result: HandResult;
+  cards: Card[]; // the five that play, taken from the cards passed in
+}
+
+// Every k-sized subset of items, order-insensitive.
+function combinations<T>(items: T[], k: number): T[][] {
+  const out: T[][] = [];
+  const picked: T[] = [];
+  const walk = (start: number) => {
+    if (picked.length === k) {
+      out.push([...picked]);
+      return;
+    }
+    for (let i = start; i < items.length; i++) {
+      picked.push(items[i]);
+      walk(i + 1);
+      picked.pop();
+    }
+  };
+  walk(0);
+  return out;
+}
+
+// The best five-card hand playable out of `cards` — seven of them at a hold'em
+// showdown (two hole + five board), which is only 21 combinations, so brute
+// force is cheaper than being clever. Returned cards are the same objects that
+// were passed in, so callers can match them by identity.
+export function bestHand(cards: Card[]): BestHand {
+  if (cards.length < 5) {
+    throw new Error(`bestHand needs at least five cards, got ${cards.length}`);
+  }
+  const combos = combinations(cards, 5);
+  let best: BestHand = { result: evaluateHand(combos[0]), cards: combos[0] };
+  for (let i = 1; i < combos.length; i++) {
+    const result = evaluateHand(combos[i]);
+    if (compareResults(result, best.result) > 0) best = { result, cards: combos[i] };
+  }
+  return best;
 }
