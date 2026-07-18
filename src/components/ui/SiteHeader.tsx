@@ -5,6 +5,7 @@ import { useState, useRef, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { Home } from "lucide-react";
 import { ThemeToggle } from "./ThemeToggle";
+import { NotificationBell } from "./NotificationBell";
 
 // Home isn't here: it's an icon control of its own, next to the theme toggle.
 const NAV = [
@@ -61,11 +62,15 @@ export function SiteHeader() {
         alignItems: "center",
         justifyContent: "center",
         padding: "0 20px",
-        background: "var(--background)",
+        // transparent so the icons read as floating logos rather than sitting on
+        // a bar; the strip itself ignores the pointer so anything behind it
+        // stays draggable, only the icon cluster below opts back in
+        background: "transparent",
+        pointerEvents: "none",
         zIndex: 50,
       }}
     >
-      <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 16, pointerEvents: "auto" }}>
         {/* Scroll-down arrow nav trigger */}
         <div ref={ref} style={{ position: "relative" }}>
           <button
@@ -145,6 +150,8 @@ export function SiteHeader() {
             <Home size={16} strokeWidth={1.75} />
           </Link>
         )}
+
+        <NotificationBell />
 
         <ThemeToggle />
       </div>

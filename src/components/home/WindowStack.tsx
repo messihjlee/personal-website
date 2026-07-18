@@ -84,7 +84,10 @@ const DEAL_STEP = 90; // ms between cards
 
 const FRICTION = 0.94;
 const MIN_VELOCITY = 0.35;
-const EDGE_PADDING = 12;
+// cards roam the whole page edge-to-edge — no margin, and free to slide up under
+// the header (its logos float transparently and don't capture the pointer). The
+// clamp only stops a card from leaving the page entirely.
+const EDGE_PADDING = 0;
 
 // how far the pointer must travel from where it went down before a
 // gesture counts as a drag rather than a click — trackpad taps and real
@@ -314,12 +317,15 @@ export function WindowStack() {
             {/* the card face, baked face-up (the nav word is part of the card
                 art, in the rank position). The art is borderless — the edge is
                 the .card-window frame every other pane on the site wears.
-                A gentle lift on hover */}
+                A gentle lift on hover — but not while dragging: the lift lives
+                on this child, so the drag clamp (which measures the Link box)
+                can't see it, and a lifted card would ride ~10px over the top
+                edge. Dropping it during the drag keeps the card at the clamp. */}
             <div
               className="card-window home-card"
               style={{
                 backgroundImage: `url(/cards/home-${i}.png)`,
-                transform: isHovered ? "translateY(-10px) scale(1.05)" : "none",
+                transform: isHovered && !isDragging ? "translateY(-10px) scale(1.05)" : "none",
                 transition: isDragging
                   ? "none"
                   : "transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)",

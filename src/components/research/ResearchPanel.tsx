@@ -3,7 +3,7 @@
 import { useState, useMemo, useRef, useEffect } from "react";
 import { ChevronDown, ChevronUp, ExternalLink, FileText } from "lucide-react";
 import type { Publication } from "@/lib/research";
-import { useDraggable } from "@/hooks/useDraggable";
+import { EDGE_MARGIN, paneHBounds, useDraggable } from "@/hooks/useDraggable";
 import { BAR_H, BTN_W, CardWindow, NavBar } from "@/components/ui/CardWindow";
 
 type WinState = "normal" | "minimized" | "fullscreen" | "closed";
@@ -115,10 +115,10 @@ export function ResearchPanel({ publications }: { publications: Publication[] })
   const { pos, setPos, onMouseDown, onTouchStart } = useDraggable(() => {
     const vw = window.innerWidth;
     const vh = window.innerHeight;
-    const winW = Math.min(WINDOW_W, vw - 32);
+    const winW = Math.min(WINDOW_W, vw - 2 * EDGE_MARGIN);
     const winH = Math.min(COLLAPSED_H, vh - WINDOW_TOP - BOTTOM_RESERVED);
     return {
-      x: Math.max(16, (vw - winW) / 2),
+      x: Math.max(EDGE_MARGIN, (vw - winW) / 2),
       y: Math.max(WINDOW_TOP, (vh - BOTTOM_RESERVED - winH) / 2),
     };
   });
@@ -151,7 +151,7 @@ export function ResearchPanel({ publications }: { publications: Publication[] })
         onClick={() => setWin("normal")}
         style={{
           position: "fixed",
-          left: pos.x,
+          left: Math.max(EDGE_MARGIN, pos.x),
           top: pos.y,
           fontSize: 13,
           letterSpacing: "0.14em",
@@ -185,15 +185,14 @@ export function ResearchPanel({ publications }: { publications: Publication[] })
       }
     : {
         position: "fixed",
-        left: pos.x,
         top: pos.y,
-        width: `min(${WINDOW_W}px, calc(100vw - 32px))`,
+        ...paneHBounds(pos.x, WINDOW_W),
         // collapsed, the reserved line counts fix the height exactly; expanded,
         // it grows but never past the bottom of the viewport
         height: expanded
-          ? `min(${WINDOW_H_EXPANDED}px, calc(100svh - ${Math.round(pos.y) + 24}px))`
+          ? `min(${WINDOW_H_EXPANDED}px, calc(100svh - ${Math.round(pos.y) + EDGE_MARGIN}px))`
           : "auto",
-        maxHeight: `calc(100svh - ${Math.round(pos.y) + 24}px)`,
+        maxHeight: `calc(100svh - ${Math.round(pos.y) + EDGE_MARGIN}px)`,
         transition: "height 0.2s ease",
         zIndex: 10,
       };

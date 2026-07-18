@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { MDXRemote } from "next-mdx-remote";
 import type { MDXRemoteSerializeResult } from "next-mdx-remote";
 import Image from "next/image";
-import { useDraggable } from "@/hooks/useDraggable";
+import { EDGE_MARGIN, paneHBounds, useDraggable } from "@/hooks/useDraggable";
 import { CardWindow } from "@/components/ui/CardWindow";
 
 interface ArticleData {
@@ -108,10 +108,10 @@ export function BlogArticleWindow({
     const vw = window.innerWidth;
     const vh = window.innerHeight;
     const isMobile = vw < 720;
-    const winW = Math.min(680, vw - 32);
+    const winW = Math.min(680, vw - 2 * EDGE_MARGIN);
     const winH = Math.min(680, vh - 84);
     return {
-      x: Math.max(isMobile ? 16 : 20, (vw - winW) / 2 + windowIndex * (isMobile ? 16 : 30)),
+      x: Math.max(EDGE_MARGIN, (vw - winW) / 2 + windowIndex * (isMobile ? 16 : 30)),
       y: Math.max(44, (vh - winH) / 2 + windowIndex * (isMobile ? 20 : 24)),
     };
   });
@@ -141,7 +141,7 @@ export function BlogArticleWindow({
         onClick={() => setWin("normal")}
         style={{
           position: "fixed",
-          left: pos.x,
+          left: Math.max(EDGE_MARGIN, pos.x),
           top: pos.y,
           fontSize: 12, letterSpacing: "0.14em", color: "var(--muted)", background: "none",
           border: "1px solid var(--border)", padding: "8px 18px", cursor: "pointer", fontFamily: "inherit",
@@ -159,9 +159,8 @@ export function BlogArticleWindow({
     ? { position: "fixed", top: 37, left: 0, right: 0, bottom: 0, zIndex: 50 }
     : {
         position: "fixed",
-        left: pos.x,
         top: pos.y,
-        width: "min(680px, calc(100vw - 32px))",
+        ...paneHBounds(pos.x, 680),
         height: "min(680px, calc(100svh - 84px))",
         zIndex: 10,
       };

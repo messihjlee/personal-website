@@ -3,7 +3,7 @@
 import { useState, useMemo } from "react";
 import Image from "next/image";
 import type { BlogPost } from "@/types";
-import { useDraggable } from "@/hooks/useDraggable";
+import { EDGE_MARGIN, paneHBounds, useDraggable } from "@/hooks/useDraggable";
 import { BTN_W, CardWindow, NavBar } from "@/components/ui/CardWindow";
 
 const CATEGORIES = ["books", "daily", "art", "travel"] as const;
@@ -33,10 +33,10 @@ export function BlogPanel({
   const { pos, onMouseDown, onTouchStart } = useDraggable(() => {
     const vw = window.innerWidth;
     const vh = window.innerHeight;
-    const winW = Math.min(WINDOW_W, vw - 32);
+    const winW = Math.min(WINDOW_W, vw - 2 * EDGE_MARGIN);
     const winH = Math.min(WINDOW_H, vh - WINDOW_TOP - BOTTOM_RESERVED);
     return {
-      x: Math.max(16, (vw - winW) / 2),
+      x: Math.max(EDGE_MARGIN, (vw - winW) / 2),
       y: Math.max(WINDOW_TOP, (vh - BOTTOM_RESERVED - winH) / 2),
     };
   });
@@ -114,7 +114,7 @@ export function BlogPanel({
           onClick={() => setWin("normal")}
           style={{
             position: "fixed",
-            left: pos.x,
+            left: Math.max(EDGE_MARGIN, pos.x),
             top: pos.y,
             fontSize: 13,
             letterSpacing: "0.14em",
@@ -146,9 +146,8 @@ export function BlogPanel({
       }
     : {
         position: "fixed",
-        left: pos.x,
         top: pos.y,
-        width: `min(${WINDOW_W}px, calc(100vw - 32px))`,
+        ...paneHBounds(pos.x, WINDOW_W),
         height: isMinimized
           ? "auto"
           : `min(${WINDOW_H}px, calc(100svh - ${WINDOW_TOP + BOTTOM_RESERVED}px))`,
