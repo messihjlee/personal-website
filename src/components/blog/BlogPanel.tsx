@@ -5,6 +5,7 @@ import Image from "next/image";
 import type { BlogPost } from "@/types";
 import { EDGE_MARGIN, paneHBounds, useDraggable } from "@/hooks/useDraggable";
 import { BTN_W, CardWindow, NavBar } from "@/components/ui/CardWindow";
+import { useMinimizedWindow } from "@/lib/minimized";
 
 const CATEGORIES = ["books", "daily", "art", "travel"] as const;
 type Category = (typeof CATEGORIES)[number];
@@ -17,7 +18,7 @@ const WINDOW_TOP = 48;
 const WINDOW_W = 680;
 const WINDOW_H = 520;
 
-type WinState = "normal" | "minimized" | "fullscreen" | "closed";
+type WinState = "normal" | "fullscreen";
 
 export function BlogPanel({
   posts,
@@ -29,6 +30,10 @@ export function BlogPanel({
   const [category, setCategory] = useState<Category | null>(null);
   const [index, setIndex] = useState(0);
   const [win, setWin] = useState<WinState>("normal");
+  const { windowRef, minimized, minimize, close, activate, animStyle, restoreClass } = useMinimizedWindow({
+    id: "blog",
+    label: "blog",
+  });
 
   const { pos, onMouseDown, onTouchStart } = useDraggable(() => {
     const vw = window.innerWidth;
@@ -60,8 +65,10 @@ export function BlogPanel({
 
   if (!pos) return null;
 
+  // minimized, the whole window (and its category bar) lives as a dock pill
+  if (minimized) return null;
+
   const isFullscreen = win === "fullscreen";
-  const isMinimized = win === "minimized";
 
   const categoryBar = (
     <div
@@ -105,36 +112,6 @@ export function BlogPanel({
     </div>
   );
 
-  if (win === "closed") {
-    return (
-      <>
-        {categoryBar}
-        <button
-          className="pixel-edge"
-          onClick={() => setWin("normal")}
-          style={{
-            position: "fixed",
-            left: Math.max(EDGE_MARGIN, pos.x),
-            top: pos.y,
-            fontSize: 13,
-            letterSpacing: "0.14em",
-            color: "var(--muted)",
-            background: "none",
-            border: "1px solid var(--border)",
-            padding: "8px 0",
-            width: BTN_W,
-            textAlign: "center",
-            cursor: "pointer",
-            fontFamily: "inherit",
-            zIndex: 10,
-          }}
-        >
-          blog
-        </button>
-      </>
-    );
-  }
-
   const style: React.CSSProperties = isFullscreen
     ? {
         position: "fixed",
@@ -148,9 +125,9 @@ export function BlogPanel({
         position: "fixed",
         top: pos.y,
         ...paneHBounds(pos.x, WINDOW_W),
-        height: isMinimized
-          ? "auto"
-          : `min(${WINDOW_H}px, calc(100svh - ${WINDOW_TOP + BOTTOM_RESERVED}px))`,
+        // height tracks the live position, like every other pane: drag the
+        // window down and it shrinks so its bottom edge never leaves the screen
+        height: `min(${WINDOW_H}px, calc(100svh - ${Math.round(pos.y) + EDGE_MARGIN}px))`,
         zIndex: 10,
       };
 
@@ -168,15 +145,17 @@ export function BlogPanel({
       </div>
 
       <CardWindow
+        innerRef={windowRef}
+        className={restoreClass}
         label="blog"
         subtitle={post.title.length > 40 ? post.title.slice(0, 40) + "…" : post.title}
-        minimized={isMinimized}
         fullscreen={isFullscreen}
-        onClose={() => setWin("closed")}
-        onMinimize={() => setWin(isMinimized ? "normal" : "minimized")}
+        onClose={close}
+        onMinimize={minimize}
+        onActivate={activate}
         onFullscreen={() => setWin(isFullscreen ? "normal" : "fullscreen")}
         dragProps={{ onMouseDown, onTouchStart }}
-        style={style}
+        style={{ ...style, ...animStyle }}
         footer={
           <NavBar
             index={index}
@@ -186,28 +165,7 @@ export function BlogPanel({
           />
         }
       >
-        {isMinimized ? (
-          <div style={{ padding: "56px 0", display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <button
-              className="pixel-edge"
-              onClick={() => setWin("normal")}
-              style={{
-                fontSize: 13,
-                letterSpacing: "0.18em",
-                color: "var(--muted)",
-                background: "none",
-                border: "1px solid var(--border)",
-                padding: "10px 0",
-                width: BTN_W,
-                textAlign: "center",
-                cursor: "pointer",
-                fontFamily: "inherit",
-              }}
-            >
-              show
-            </button>
-          </div>
-        ) : (
+        {(
           <div style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column", overflow: "hidden" }}>
             {post.coverImage && (
               <div style={{ position: "relative", width: "100%", flex: 1, minHeight: 0 }}>

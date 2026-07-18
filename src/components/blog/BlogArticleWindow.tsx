@@ -89,6 +89,7 @@ export function BlogArticleWindow({
   slug,
   onClose,
   onMinimize,
+  onActivate,
   onTitleLoaded,
   minimized = false,
   windowIndex = 1,
@@ -96,6 +97,7 @@ export function BlogArticleWindow({
   slug: string;
   onClose: () => void;
   onMinimize: () => void;
+  onActivate?: () => void;
   onTitleLoaded?: (title: string) => void;
   minimized?: boolean;
   windowIndex?: number;
@@ -172,6 +174,7 @@ export function BlogArticleWindow({
       fullscreen={isFullscreen}
       onClose={onClose}
       onMinimize={onMinimize}
+      onActivate={onActivate}
       onFullscreen={() => setWin(isFullscreen ? "normal" : "fullscreen")}
       dragProps={{ onMouseDown, onTouchStart }}
       style={style}

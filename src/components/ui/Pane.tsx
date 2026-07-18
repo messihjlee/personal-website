@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { EDGE_MARGIN, paneHBounds, useDraggable } from "@/hooks/useDraggable";
-import { BTN_W, CardWindow } from "@/components/ui/CardWindow";
+import { CardWindow } from "@/components/ui/CardWindow";
+import { useMinimizedWindow } from "@/lib/minimized";
 
 /**
  * The one draggable window every info pane wears: about, donate, contact and the
@@ -11,49 +12,49 @@ import { BTN_W, CardWindow } from "@/components/ui/CardWindow";
  * that keeps the window an EDGE_MARGIN off each viewport edge — so a pane only
  * supplies its own label, body and footer.
  *
- * Two closing modes:
- *  - persistent: pass `reopenLabel`, and closing collapses the window to a pill
- *    that reopens it (about / donate / contact live on their own page).
- *  - dismissible: pass `onClose`, and closing hands back to the parent to unmount
- *    (the news pane, launched from the header bell).
+ * The red button closes the window. Route-backed panes (about / donate /
+ * contact) leave `onClose` unset and close through the global window manager;
+ * the dismissible news pane passes `onClose` so the header bell can unmount it.
  */
 
 const WINDOW_TOP = 48;
 const BOTTOM_RESERVED = 48;
 const FULLSCREEN_TOP = 37;
 
-type WinState = "normal" | "minimized" | "fullscreen" | "closed";
+type WinState = "normal" | "fullscreen";
 
 export interface PaneProps {
+  // stable key for the window manager and dock
+  id: string;
   label: string;
   subtitle?: string;
   width: number;
   height: number;
   // stacking order; a header-launched pane (news) rides above the page's panes
   zIndex?: number;
-  // persistent panes pass this — closing collapses to a reopen pill with this text
-  reopenLabel?: string;
   // dismissible panes pass this — closing calls back so the parent can unmount
+  // (the news pane); route-backed panes omit it and close via the manager
   onClose?: () => void;
   footer?: React.ReactNode;
-  // shown in the body while minimized; omit to show nothing
-  minimizedContent?: React.ReactNode;
   children?: React.ReactNode;
 }
 
 export function Pane({
+  id,
   label,
   subtitle,
   width,
   height,
   zIndex = 10,
-  reopenLabel,
   onClose,
   footer,
-  minimizedContent,
   children,
 }: PaneProps) {
   const [win, setWin] = useState<WinState>("normal");
+  const { windowRef, minimized, minimize, close, activate, animStyle, restoreClass } = useMinimizedWindow({
+    id,
+    label,
+  });
 
   const { pos, onMouseDown, onTouchStart } = useDraggable(() => {
     const vw = window.innerWidth;
@@ -68,64 +69,37 @@ export function Pane({
 
   if (!pos) return null;
 
-  if (win === "closed") {
-    // only persistent panes reach here; dismissible ones are unmounted by onClose
-    if (!reopenLabel) return null;
-    return (
-      <button
-        className="pixel-edge"
-        onClick={() => setWin("normal")}
-        style={{
-          position: "fixed",
-          left: Math.max(EDGE_MARGIN, pos.x),
-          top: pos.y,
-          fontSize: 13,
-          letterSpacing: "0.14em",
-          color: "var(--muted)",
-          background: "none",
-          border: "1px solid var(--border)",
-          padding: "8px 0",
-          width: BTN_W,
-          textAlign: "center",
-          cursor: "pointer",
-          fontFamily: "inherit",
-          zIndex,
-        }}
-      >
-        {reopenLabel}
-      </button>
-    );
-  }
+  // minimized panes live as a pill in the dock (rendered by the root layout)
+  if (minimized) return null;
 
   const isFullscreen = win === "fullscreen";
-  const isMinimized = win === "minimized";
 
-  const style: React.CSSProperties = isFullscreen
+  const base: React.CSSProperties = isFullscreen
     ? { position: "fixed", top: FULLSCREEN_TOP, left: 0, right: 0, bottom: 0, zIndex: Math.max(zIndex, 50) }
     : {
         position: "fixed",
         top: pos.y,
         ...paneHBounds(pos.x, width),
-        height: isMinimized
-          ? "auto"
-          : `min(${height}px, calc(100svh - ${Math.round(pos.y) + EDGE_MARGIN}px))`,
+        height: `min(${height}px, calc(100svh - ${Math.round(pos.y) + EDGE_MARGIN}px))`,
         zIndex,
       };
 
   return (
     <CardWindow
+      innerRef={windowRef}
+      className={restoreClass}
       label={label}
       subtitle={subtitle}
-      minimized={isMinimized}
       fullscreen={isFullscreen}
-      onClose={reopenLabel ? () => setWin("closed") : onClose}
-      onMinimize={() => setWin(isMinimized ? "normal" : "minimized")}
+      onClose={onClose ?? close}
+      onMinimize={minimize}
+      onActivate={activate}
       onFullscreen={() => setWin(isFullscreen ? "normal" : "fullscreen")}
       dragProps={{ onMouseDown, onTouchStart }}
-      style={style}
+      style={{ ...base, ...animStyle }}
       footer={footer}
     >
-      {isMinimized ? minimizedContent : children}
+      {children}
     </CardWindow>
   );
 }

@@ -10,11 +10,11 @@ import { Pane } from "@/components/ui/Pane";
 export function DonatePanel() {
   return (
     <Pane
+      id="support"
       label="support"
       subtitle="research fund"
       width={560}
       height={420}
-      reopenLabel="support"
       footer={
         <div style={footerBarStyle}>
           {/* the table is an overlay on the home page, so this is the way back */}

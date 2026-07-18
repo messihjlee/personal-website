@@ -16,7 +16,19 @@ export interface Publication {
 }
 
 function stripBraces(s: string): string {
-  return s.replace(/[{}]/g, "");
+  return (
+    s
+      // LaTeX text dashes (e.g. COCA{\textemdash}a corpus…) → real dashes,
+      // before the surrounding braces are stripped
+      .replace(/\\textemdash\s*/g, "—")
+      .replace(/\\textendash\s*/g, "–")
+      // TeX-style prose dashes written as "word -- word" (or ---) → an em dash;
+      // the required spaces on both sides keep numeric ranges like 0.84-4.52 safe
+      .replace(/\s+---?\s+/g, "—")
+      // escaped specials: \& \% \$ \# \_ → the bare character
+      .replace(/\\([&%$#_])/g, "$1")
+      .replace(/[{}]/g, "")
+  );
 }
 
 function parseFields(body: string): Record<string, string> {

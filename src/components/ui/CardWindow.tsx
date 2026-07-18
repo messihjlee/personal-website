@@ -19,9 +19,11 @@ export function CardWindow({
   onClose,
   onMinimize,
   onFullscreen,
+  onActivate,
   dragProps,
   footer,
   style,
+  className,
   innerRef,
   children,
 }: {
@@ -32,19 +34,27 @@ export function CardWindow({
   onClose?: () => void;
   onMinimize?: () => void;
   onFullscreen?: () => void;
+  // pressed anywhere in the window — used to raise it above overlapping windows
+  onActivate?: () => void;
   dragProps?: {
     onMouseDown?: (e: React.MouseEvent) => void;
     onTouchStart?: (e: React.TouchEvent) => void;
   };
   footer?: React.ReactNode;
   style?: React.CSSProperties;
+  className?: string;
   innerRef?: React.Ref<HTMLDivElement>;
   children?: React.ReactNode;
 }) {
   const draggable = !!dragProps && !fullscreen;
 
   return (
-    <div ref={innerRef} className="card-window" style={style}>
+    <div
+      ref={innerRef}
+      onPointerDown={onActivate}
+      className={className ? `card-window ${className}` : "card-window"}
+      style={style}
+    >
       <div className="card-window-inner">
         <div
           onMouseDown={draggable ? dragProps?.onMouseDown : undefined}

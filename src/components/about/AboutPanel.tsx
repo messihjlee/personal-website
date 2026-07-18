@@ -19,11 +19,11 @@ export function AboutPanel({ sections }: { sections: Section[] }) {
 
   return (
     <Pane
+      id="about"
       label="about"
       subtitle={sections[index].title}
       width={WINDOW_W}
       height={WINDOW_H}
-      reopenLabel="about"
       footer={
         <NavBar
           index={index}
@@ -31,28 +31,6 @@ export function AboutPanel({ sections }: { sections: Section[] }) {
           onPrev={() => setIndex((i) => Math.max(0, i - 1))}
           onNext={() => setIndex((i) => Math.min(sections.length - 1, i + 1))}
         />
-      }
-      minimizedContent={
-        <div style={{ padding: "56px 0", display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <a
-            className="pixel-edge"
-            href="/found"
-            style={{
-              fontSize: 13,
-              letterSpacing: "0.18em",
-              color: "var(--muted)",
-              background: "none",
-              border: "1px solid var(--border)",
-              padding: "10px 24px",
-              cursor: "pointer",
-              fontFamily: "inherit",
-              textDecoration: "none",
-              display: "inline-block",
-            }}
-          >
-            you&apos;ve found me
-          </a>
-        </div>
       }
     >
       <div

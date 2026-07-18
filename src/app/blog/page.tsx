@@ -1,31 +1,12 @@
 import type { Metadata } from "next";
-import { getAllPosts } from "@/lib/notion";
-import { BlogDesktop } from "@/components/blog/BlogDesktop";
-
-export const revalidate = 300;
+import { RouteWindow } from "@/lib/minimized";
 
 export const metadata: Metadata = {
   title: "Blog",
 };
 
-export default async function BlogPage() {
-  const posts = await getAllPosts();
-
-  return (
-    <div
-      style={{
-        minHeight: "100svh",
-        background: "var(--background)",
-        paddingTop: 36,
-      }}
-    >
-      <div
-        style={{
-          minHeight: "calc(100svh - 36px)",
-        }}
-      >
-        <BlogDesktop posts={posts} />
-      </div>
-    </div>
-  );
+// The blog window is mounted globally (WindowLayer); this route just brings it
+// up. Its posts are fetched in the root layout.
+export default function BlogPage() {
+  return <RouteWindow id="blog" />;
 }

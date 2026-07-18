@@ -5,8 +5,9 @@ import { ChevronDown, ChevronUp, ExternalLink, FileText } from "lucide-react";
 import type { Publication } from "@/lib/research";
 import { EDGE_MARGIN, paneHBounds, useDraggable } from "@/hooks/useDraggable";
 import { BAR_H, BTN_W, CardWindow, NavBar } from "@/components/ui/CardWindow";
+import { useMinimizedWindow } from "@/lib/minimized";
 
-type WinState = "normal" | "minimized" | "fullscreen" | "closed";
+type WinState = "normal" | "fullscreen" | "closed";
 
 const WINDOW_TOP = 48;
 const BOTTOM_RESERVED = 48;
@@ -79,13 +80,16 @@ export function ResearchPanel({ publications }: { publications: Publication[] })
   const [index, setIndex] = useState(0);
   const [win, setWin] = useState<WinState>("normal");
   const [expanded, setExpanded] = useState(false);
+  const { windowRef, minimized, minimize, close, activate, animStyle, restoreClass } = useMinimizedWindow({
+    id: "research",
+    label: "research",
+  });
 
   // whether the clamped abstract actually overflows depends on the rendered
   // width, so it has to be measured rather than counted
   const abstractRef = useRef<HTMLParagraphElement>(null);
   const [overflows, setOverflows] = useState(false);
 
-  const winRef = useRef<HTMLDivElement>(null);
   const recenter = useRef(false);
 
   function goTo(i: number) {
@@ -101,9 +105,9 @@ export function ResearchPanel({ publications }: { publications: Publication[] })
   // the window is content-sized, so re-centring after expand/collapse has to
   // measure the height it actually ended up at
   useEffect(() => {
-    if (!recenter.current || !winRef.current) return;
+    if (!recenter.current || !windowRef.current) return;
     recenter.current = false;
-    const h = winRef.current.offsetHeight;
+    const h = windowRef.current.offsetHeight;
     const vh = window.innerHeight;
     setPos((p) => ({
       x: p?.x ?? 0,
@@ -144,35 +148,10 @@ export function ResearchPanel({ publications }: { publications: Publication[] })
 
   if (!pos) return null;
 
-  if (win === "closed") {
-    return (
-      <button
-        className="pixel-edge"
-        onClick={() => setWin("normal")}
-        style={{
-          position: "fixed",
-          left: Math.max(EDGE_MARGIN, pos.x),
-          top: pos.y,
-          fontSize: 13,
-          letterSpacing: "0.14em",
-          color: "var(--muted)",
-          background: "none",
-          border: "1px solid var(--border)",
-          padding: "8px 0",
-          width: BTN_W,
-          textAlign: "center",
-          cursor: "pointer",
-          fontFamily: "inherit",
-          zIndex: 10,
-        }}
-      >
-        research
-      </button>
-    );
-  }
+  // minimized panes live as a pill in the dock (rendered by the root layout)
+  if (minimized) return null;
 
   const isFullscreen = win === "fullscreen";
-  const isMinimized = win === "minimized";
 
   const windowStyle: React.CSSProperties = isFullscreen
     ? {
@@ -199,16 +178,17 @@ export function ResearchPanel({ publications }: { publications: Publication[] })
 
   return (
     <CardWindow
-      innerRef={winRef}
+      innerRef={windowRef}
+      className={restoreClass}
       label="research"
       subtitle={`${pub.venue} · ${pub.year}`}
-      minimized={isMinimized}
       fullscreen={isFullscreen}
-      onClose={() => setWin("closed")}
-      onMinimize={() => setWin(isMinimized ? "normal" : "minimized")}
+      onClose={close}
+      onMinimize={minimize}
+      onActivate={activate}
       onFullscreen={() => setWin(isFullscreen ? "normal" : "fullscreen")}
       dragProps={{ onMouseDown, onTouchStart }}
-      style={windowStyle}
+      style={{ ...windowStyle, ...animStyle }}
       footer={
         <NavBar
           index={index}
@@ -218,30 +198,7 @@ export function ResearchPanel({ publications }: { publications: Publication[] })
         />
       }
     >
-      {isMinimized && (
-        <div style={{ padding: "56px 0", display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <button
-            className="pixel-edge"
-            onClick={() => setWin("normal")}
-            style={{
-              fontSize: 13,
-              letterSpacing: "0.18em",
-              color: "var(--muted)",
-              background: "none",
-              border: "1px solid var(--border)",
-              padding: "10px 0",
-              width: BTN_W,
-              textAlign: "center",
-              cursor: "pointer",
-              fontFamily: "inherit",
-            }}
-          >
-            show
-          </button>
-        </div>
-      )}
-
-      {!isMinimized && (
+      {(
         <>
           {/* Content */}
           <div

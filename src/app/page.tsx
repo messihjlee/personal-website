@@ -1,4 +1,5 @@
 import { WindowStack } from "@/components/home/WindowStack";
+import { RouteWindow } from "@/lib/minimized";
 
 export default function Home() {
   return (
@@ -11,8 +12,10 @@ export default function Home() {
         justifyContent: "center",
         background: "var(--background)",
         padding: "36px 16px 0",
+        overflow: "hidden",
       }}
     >
+      <RouteWindow id={null} />
       <WindowStack />
     </div>
   );

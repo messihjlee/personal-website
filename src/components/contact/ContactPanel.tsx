@@ -55,11 +55,11 @@ export function ContactPanel() {
 
   return (
     <Pane
+      id="contact"
       label="contact"
       subtitle={entry.title}
       width={680}
       height={360}
-      reopenLabel="contact"
       footer={
         <NavBar
           index={index}

@@ -75,6 +75,7 @@ export function NotificationBell() {
 
         {open && (
           <div
+            className="notif-tray"
             style={{
               position: "absolute",
               top: "calc(100% + 8px)",

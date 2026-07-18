@@ -10,7 +10,7 @@ import type { NotificationItem } from "@/lib/notifications";
 // closing hands back to onClose so the bell can unmount it.
 export function NewsWindow({ item, onClose }: { item: NotificationItem; onClose: () => void }) {
   return (
-    <Pane label="news" subtitle={item.date} width={520} height={380} zIndex={60} onClose={onClose}>
+    <Pane id={`news:${item.id}`} label="news" subtitle={item.date} width={520} height={380} zIndex={60} onClose={onClose}>
       <div
         style={{
           flex: 1,

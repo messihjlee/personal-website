@@ -33,6 +33,14 @@ export function BlogDesktop({ posts }: { posts: BlogPost[] }) {
     setMinimizedSlugs((prev) => prev.filter((s) => s !== slug));
   }
 
+  // raise a covered article above the others — later in openSlugs renders last,
+  // so it paints on top (every article window shares the same z-index)
+  function focusArticle(slug: string) {
+    setOpenSlugs((prev) =>
+      prev[prev.length - 1] === slug ? prev : [...prev.filter((s) => s !== slug), slug],
+    );
+  }
+
   function handleTitleLoaded(slug: string, title: string) {
     setArticleTitles((prev) => ({ ...prev, [slug]: title }));
   }
@@ -47,6 +55,7 @@ export function BlogDesktop({ posts }: { posts: BlogPost[] }) {
           slug={slug}
           onClose={() => closeArticle(slug)}
           onMinimize={() => minimizeArticle(slug)}
+          onActivate={() => focusArticle(slug)}
           onTitleLoaded={(title) => handleTitleLoaded(slug, title)}
           minimized={minimizedSlugs.includes(slug)}
           windowIndex={indices.current.get(slug) ?? 1}
