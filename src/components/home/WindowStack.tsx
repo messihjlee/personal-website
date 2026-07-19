@@ -46,8 +46,11 @@ const STEP_X = 1 + GAP_X; // horizontal card pitch, in W
 const LAYOUTS = {
   dice: {
     // three card-heights tall, so cap by viewport height too (leaving room
-    // for the fixed header)
-    cardWidth: "clamp(84px, min(20vh, 44vw), 240px)",
+    // for the fixed header). svh, not vh: the container is 100svh, and on iOS
+    // Safari vh measures the *large* viewport (address bar hidden) — so vh here
+    // would size the stack against a taller viewport than it lives in and the
+    // bottom row would spill past the screen.
+    cardWidth: "clamp(84px, min(20svh, 44vw), 240px)",
     left: DICE_LEFT,
     top: DICE_TOP,
     cw: 2 + GAP_X,
