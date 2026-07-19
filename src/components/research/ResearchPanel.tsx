@@ -268,12 +268,7 @@ export function ResearchPanel({ publications }: { publications: Publication[] })
                 <FileText size={14} /> pdf
               </a>
             )}
-            {arxivUrl && (
-              <a className="pixel-edge" href={arxivUrl} target="_blank" rel="noopener noreferrer" style={linkStyle}>
-                <ExternalLink size={14} /> arxiv
-              </a>
-            )}
-            {linkUrl && linkUrl !== arxivUrl && (
+            {linkUrl && (
               <a className="pixel-edge" href={linkUrl} target="_blank" rel="noopener noreferrer" style={linkStyle}>
                 <ExternalLink size={14} /> paper
               </a>
