@@ -1,7 +1,7 @@
 export const siteConfig = {
   name: "Messi H.J. Lee",
   firstName: "Messi",
-  title: "Messi H.J. Lee — Machine Psychology Researcher",
+  title: "messi h.j. lee",
   description:
     "Researcher exploring the intersection of psychology, cognition, and artificial intelligence.",
   url: "https://messihjlee.com",

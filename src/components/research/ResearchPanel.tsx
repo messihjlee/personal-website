@@ -5,9 +5,7 @@ import { ChevronDown, ChevronUp, ExternalLink, FileText } from "lucide-react";
 import type { Publication } from "@/lib/research";
 import { EDGE_MARGIN, paneHBounds, useDraggable } from "@/hooks/useDraggable";
 import { BAR_H, BTN_W, CardWindow, NavBar } from "@/components/ui/CardWindow";
-import { useMinimizedWindow } from "@/lib/minimized";
-
-type WinState = "normal" | "fullscreen" | "closed";
+import { useWindowChrome } from "@/lib/minimized";
 
 const WINDOW_TOP = 48;
 const BOTTOM_RESERVED = 48;
@@ -78,18 +76,16 @@ function shuffle<T>(arr: T[]): T[] {
 export function ResearchPanel({ publications }: { publications: Publication[] }) {
   const items = useMemo(() => shuffle(publications), [publications]);
   const [index, setIndex] = useState(0);
-  const [win, setWin] = useState<WinState>("normal");
   const [expanded, setExpanded] = useState(false);
-  const { windowRef, minimized, minimize, close, activate, animStyle, restoreClass } = useMinimizedWindow({
-    id: "research",
-    label: "research",
-  });
+  const { close, activate } = useWindowChrome({ id: "research", label: "research" });
 
   // whether the clamped abstract actually overflows depends on the rendered
   // width, so it has to be measured rather than counted
   const abstractRef = useRef<HTMLParagraphElement>(null);
   const [overflows, setOverflows] = useState(false);
 
+  // the window element, measured after an expand/collapse to re-centre it
+  const windowRef = useRef<HTMLDivElement>(null);
   const recenter = useRef(false);
 
   function goTo(i: number) {
@@ -134,7 +130,7 @@ export function ResearchPanel({ publications }: { publications: Publication[] })
     const el = abstractRef.current;
     if (!el || expanded) return;
     setOverflows(el.scrollHeight > el.clientHeight + 1);
-  }, [index, expanded, win, pos]);
+  }, [index, expanded, pos]);
 
   const pub = items[index];
 
@@ -148,47 +144,29 @@ export function ResearchPanel({ publications }: { publications: Publication[] })
 
   if (!pos) return null;
 
-  // minimized panes live as a pill in the dock (rendered by the root layout)
-  if (minimized) return null;
-
-  const isFullscreen = win === "fullscreen";
-
-  const windowStyle: React.CSSProperties = isFullscreen
-    ? {
-        position: "fixed",
-        top: 37,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        zIndex: 50,
-      }
-    : {
-        position: "fixed",
-        top: pos.y,
-        ...paneHBounds(pos.x, WINDOW_W),
-        // collapsed, the reserved line counts fix the height exactly; expanded,
-        // it grows but never past the bottom of the viewport
-        height: expanded
-          ? `min(${WINDOW_H_EXPANDED}px, calc(100svh - ${Math.round(pos.y) + EDGE_MARGIN}px))`
-          : "auto",
-        maxHeight: `calc(100svh - ${Math.round(pos.y) + EDGE_MARGIN}px)`,
-        transition: "height 0.2s ease",
-        zIndex: 10,
-      };
+  const windowStyle: React.CSSProperties = {
+    position: "fixed",
+    top: pos.y,
+    ...paneHBounds(pos.x, WINDOW_W),
+    // collapsed, the reserved line counts fix the height exactly; expanded,
+    // it grows but never past the bottom of the viewport
+    height: expanded
+      ? `min(${WINDOW_H_EXPANDED}px, calc(100svh - ${Math.round(pos.y) + EDGE_MARGIN}px))`
+      : "auto",
+    maxHeight: `calc(100svh - ${Math.round(pos.y) + EDGE_MARGIN}px)`,
+    transition: "height 0.2s ease",
+    zIndex: 10,
+  };
 
   return (
     <CardWindow
       innerRef={windowRef}
-      className={restoreClass}
       label="research"
       subtitle={`${pub.venue} · ${pub.year}`}
-      fullscreen={isFullscreen}
       onClose={close}
-      onMinimize={minimize}
       onActivate={activate}
-      onFullscreen={() => setWin(isFullscreen ? "normal" : "fullscreen")}
       dragProps={{ onMouseDown, onTouchStart }}
-      style={{ ...windowStyle, ...animStyle }}
+      style={windowStyle}
       footer={
         <NavBar
           index={index}

@@ -6,7 +6,6 @@ import { GlobalHeader } from "@/components/ui/GlobalHeader";
 import { siteConfig } from "@/lib/constants";
 import { PathTracker } from "@/components/PathTracker";
 import { PageTransition } from "@/components/ui/PageTransition";
-import { MinimizedDock } from "@/lib/minimized";
 import { WindowLayer } from "@/components/ui/WindowLayer";
 import { getAllPosts } from "@/lib/notion";
 import { getResearch } from "@/lib/research";
@@ -28,7 +27,9 @@ const poppins = Poppins({
 export const metadata: Metadata = {
   title: {
     default: siteConfig.title,
-    template: `%s — ${siteConfig.name}`,
+    // subpage tabs read "about — messi h.j. lee"; a lowercase literal so the
+    // capitalised siteConfig.name can stay as-is in the footer
+    template: "%s — messi h.j. lee",
   },
   description: siteConfig.description,
 };
@@ -57,7 +58,6 @@ export default async function RootLayout({
           <PathTracker />
           <PageTransition>{children}</PageTransition>
           <WindowLayer posts={posts} publications={publications} aboutSections={aboutSections} />
-          <MinimizedDock />
           <Analytics />
         </Providers>
       </body>

@@ -5,7 +5,7 @@ import Image from "next/image";
 import type { BlogPost } from "@/types";
 import { EDGE_MARGIN, paneHBounds, useDraggable } from "@/hooks/useDraggable";
 import { BTN_W, CardWindow, NavBar } from "@/components/ui/CardWindow";
-import { useMinimizedWindow } from "@/lib/minimized";
+import { useWindowChrome } from "@/lib/minimized";
 
 const CATEGORIES = ["books", "daily", "art", "travel"] as const;
 type Category = (typeof CATEGORIES)[number];
@@ -18,8 +18,6 @@ const WINDOW_TOP = 48;
 const WINDOW_W = 680;
 const WINDOW_H = 520;
 
-type WinState = "normal" | "fullscreen";
-
 export function BlogPanel({
   posts,
   onOpen,
@@ -29,11 +27,7 @@ export function BlogPanel({
 }) {
   const [category, setCategory] = useState<Category | null>(null);
   const [index, setIndex] = useState(0);
-  const [win, setWin] = useState<WinState>("normal");
-  const { windowRef, minimized, minimize, close, activate, animStyle, restoreClass } = useMinimizedWindow({
-    id: "blog",
-    label: "blog",
-  });
+  const { close, activate } = useWindowChrome({ id: "blog", label: "blog" });
 
   const { pos, onMouseDown, onTouchStart } = useDraggable(() => {
     const vw = window.innerWidth;
@@ -64,11 +58,6 @@ export function BlogPanel({
   }
 
   if (!pos) return null;
-
-  // minimized, the whole window (and its category bar) lives as a dock pill
-  if (minimized) return null;
-
-  const isFullscreen = win === "fullscreen";
 
   const categoryBar = (
     <div
@@ -112,24 +101,15 @@ export function BlogPanel({
     </div>
   );
 
-  const style: React.CSSProperties = isFullscreen
-    ? {
-        position: "fixed",
-        top: 37,
-        left: 0,
-        right: 0,
-        bottom: BOTTOM_RESERVED - 20,
-        zIndex: 30,
-      }
-    : {
-        position: "fixed",
-        top: pos.y,
-        ...paneHBounds(pos.x, WINDOW_W),
-        // height tracks the live position, like every other pane: drag the
-        // window down and it shrinks so its bottom edge never leaves the screen
-        height: `min(${WINDOW_H}px, calc(100svh - ${Math.round(pos.y) + EDGE_MARGIN}px))`,
-        zIndex: 10,
-      };
+  const style: React.CSSProperties = {
+    position: "fixed",
+    top: pos.y,
+    ...paneHBounds(pos.x, WINDOW_W),
+    // height tracks the live position, like every other pane: drag the
+    // window down and it shrinks so its bottom edge never leaves the screen
+    height: `min(${WINDOW_H}px, calc(100svh - ${Math.round(pos.y) + EDGE_MARGIN}px))`,
+    zIndex: 10,
+  };
 
   return (
     <>
@@ -145,17 +125,12 @@ export function BlogPanel({
       </div>
 
       <CardWindow
-        innerRef={windowRef}
-        className={restoreClass}
         label="blog"
         subtitle={post.title.length > 40 ? post.title.slice(0, 40) + "…" : post.title}
-        fullscreen={isFullscreen}
         onClose={close}
-        onMinimize={minimize}
         onActivate={activate}
-        onFullscreen={() => setWin(isFullscreen ? "normal" : "fullscreen")}
         dragProps={{ onMouseDown, onTouchStart }}
-        style={{ ...style, ...animStyle }}
+        style={style}
         footer={
           <NavBar
             index={index}

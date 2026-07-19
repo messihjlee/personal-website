@@ -15,7 +15,6 @@ interface ArticleData {
   mdxSource: MDXRemoteSerializeResult;
 }
 
-type WinState = "normal" | "fullscreen" | "closed";
 
 const mdxComponents = {
   ColumnImages: ({ data }: { data: string }) => {
@@ -88,23 +87,16 @@ const mdxComponents = {
 export function BlogArticleWindow({
   slug,
   onClose,
-  onMinimize,
   onActivate,
-  onTitleLoaded,
-  minimized = false,
   windowIndex = 1,
 }: {
   slug: string;
   onClose: () => void;
-  onMinimize: () => void;
   onActivate?: () => void;
-  onTitleLoaded?: (title: string) => void;
-  minimized?: boolean;
   windowIndex?: number;
 }) {
   const [article, setArticle] = useState<ArticleData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [win, setWin] = useState<WinState>("normal");
 
   const { pos, onMouseDown, onTouchStart } = useDraggable(() => {
     const vw = window.innerWidth;
@@ -124,58 +116,31 @@ export function BlogArticleWindow({
       .then((data: ArticleData) => {
         setArticle(data);
         setLoading(false);
-        onTitleLoaded?.(data.title);
       })
       .catch(() => setLoading(false));
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [slug]);
 
   if (!pos) return null;
-  if (minimized) return null;
 
   const shortTitle = article
     ? article.title.length > 48 ? article.title.slice(0, 48) + "…" : article.title
     : "loading…";
 
-  if (win === "closed") {
-    return (
-      <button
-        onClick={() => setWin("normal")}
-        style={{
-          position: "fixed",
-          left: Math.max(EDGE_MARGIN, pos.x),
-          top: pos.y,
-          fontSize: 12, letterSpacing: "0.14em", color: "var(--muted)", background: "none",
-          border: "1px solid var(--border)", padding: "8px 18px", cursor: "pointer", fontFamily: "inherit",
-          zIndex: 10,
-        }}
-      >
-        {article?.title ?? slug}
-      </button>
-    );
-  }
-
-  const isFullscreen = win === "fullscreen";
-
-  const style: React.CSSProperties = isFullscreen
-    ? { position: "fixed", top: 37, left: 0, right: 0, bottom: 0, zIndex: 50 }
-    : {
-        position: "fixed",
-        top: pos.y,
-        ...paneHBounds(pos.x, 680),
-        height: "min(680px, calc(100svh - 84px))",
-        zIndex: 10,
-      };
+  const style: React.CSSProperties = {
+    position: "fixed",
+    top: pos.y,
+    ...paneHBounds(pos.x, 680),
+    height: "min(680px, calc(100svh - 84px))",
+    zIndex: 10,
+  };
 
   return (
     <CardWindow
       label="blog"
       subtitle={shortTitle}
-      fullscreen={isFullscreen}
       onClose={onClose}
-      onMinimize={onMinimize}
       onActivate={onActivate}
-      onFullscreen={() => setWin(isFullscreen ? "normal" : "fullscreen")}
       dragProps={{ onMouseDown, onTouchStart }}
       style={style}
     >

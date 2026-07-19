@@ -1,4 +1,5 @@
 import { WindowStack } from "@/components/home/WindowStack";
+import { ScrollLock } from "@/components/home/ScrollLock";
 import { RouteWindow } from "@/lib/minimized";
 
 export default function Home() {
@@ -15,6 +16,7 @@ export default function Home() {
         overflow: "hidden",
       }}
     >
+      <ScrollLock />
       <RouteWindow id={null} />
       <WindowStack />
     </div>

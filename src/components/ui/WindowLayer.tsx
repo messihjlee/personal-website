@@ -41,20 +41,15 @@ function renderPanel(id: string, data: WindowData): React.ReactNode {
 
 /**
  * Every window is mounted here, in the root layout, so any of them can float
- * over any page. A window is mounted while it's on screen OR docked — docked
- * windows stay alive so their state survives and they reopen instantly. Open
- * windows render last, in the order they were raised, so the most recent sits
- * on top.
+ * over any page. Windows render in the order they were raised, so the most
+ * recent sits on top.
  */
 export function WindowLayer(data: WindowData) {
-  const { open, minimizedItems } = useWindows();
-
-  const minimizedOnly = minimizedItems.map((i) => i.id).filter((id) => !open.includes(id));
-  const activeIds = [...minimizedOnly, ...open];
+  const { open } = useWindows();
 
   return (
     <>
-      {activeIds.map((id) => (
+      {open.map((id) => (
         <Fragment key={id}>{renderPanel(id, data)}</Fragment>
       ))}
     </>

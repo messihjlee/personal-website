@@ -14,11 +14,7 @@ export const SUIT = "♠";
 export function CardWindow({
   label,
   subtitle,
-  minimized = false,
-  fullscreen = false,
   onClose,
-  onMinimize,
-  onFullscreen,
   onActivate,
   dragProps,
   footer,
@@ -29,11 +25,7 @@ export function CardWindow({
 }: {
   label: string;
   subtitle?: string;
-  minimized?: boolean;
-  fullscreen?: boolean;
   onClose?: () => void;
-  onMinimize?: () => void;
-  onFullscreen?: () => void;
   // pressed anywhere in the window — used to raise it above overlapping windows
   onActivate?: () => void;
   dragProps?: {
@@ -46,7 +38,7 @@ export function CardWindow({
   innerRef?: React.Ref<HTMLDivElement>;
   children?: React.ReactNode;
 }) {
-  const draggable = !!dragProps && !fullscreen;
+  const draggable = !!dragProps;
 
   return (
     <div
@@ -65,7 +57,7 @@ export function CardWindow({
             justifyContent: "space-between",
             minHeight: BAR_H,
             padding: "0 14px",
-            borderBottom: minimized ? "none" : "1px solid var(--border)",
+            borderBottom: "1px solid var(--border)",
             flexShrink: 0,
             background: "var(--card)",
             userSelect: "none",
@@ -92,22 +84,12 @@ export function CardWindow({
             ) : (
               <span style={dotStyle("#ff5f57")} />
             )}
-            {onMinimize ? (
-              <button onClick={onMinimize} aria-label="Minimize" title="minimize" style={dotStyle("#f5a623")} />
-            ) : (
-              <span style={dotStyle("#f5a623")} />
-            )}
-            {onFullscreen ? (
-              <button onClick={onFullscreen} aria-label="Fullscreen" title="fullscreen" style={dotStyle("#27c93f")} />
-            ) : (
-              <span style={dotStyle("#27c93f")} />
-            )}
           </div>
         </div>
 
         {children}
 
-        {!minimized && footer}
+        {footer}
       </div>
     </div>
   );
