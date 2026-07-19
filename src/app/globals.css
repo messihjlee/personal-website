@@ -58,22 +58,16 @@ body {
   box-sizing: border-box;
 }
 
-/* Home page: pin the document to the viewport so mobile can't scroll or
-   rubber-band the whole page while dragging cards around. position: fixed on
-   the body is what defeats iOS Safari's overscroll bounce, which overflow
-   alone doesn't stop. ScrollLock adds/removes this class per route, so every
-   other page keeps its normal scrolling. */
+/* Home page: keep the document from scrolling or rubber-banding while dragging
+   cards around. Just overflow + overscroll — no position: fixed on the body,
+   which spanned the full layout viewport and let Safari's bottom bar cover the
+   lower cards. ScrollLock adds/removes this class per route, so every other
+   page keeps its normal scrolling. */
 html.home-locked,
 html.home-locked body {
   overflow: hidden;
   overscroll-behavior: none;
   height: 100%;
-}
-
-html.home-locked body {
-  position: fixed;
-  inset: 0;
-  width: 100%;
 }
 
 .pub-title-short { display: none; }
