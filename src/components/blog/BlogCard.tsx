@@ -94,7 +94,7 @@ export function BlogCard({ post, priority }: { post: BlogPost; priority?: boolea
             <p
               className="grid-card-title"
               style={{
-                fontSize: 15,
+                fontSize: "0.9375rem",
                 letterSpacing: "0.04em",
                 color: "rgba(255,255,255,0.95)",
                 lineHeight: 1.4,
@@ -105,7 +105,7 @@ export function BlogCard({ post, priority }: { post: BlogPost; priority?: boolea
             </p>
             <time
               style={{
-                fontSize: 12,
+                fontSize: "0.75rem",
                 letterSpacing: "0.08em",
                 color: "rgba(255,255,255,0.55)",
               }}

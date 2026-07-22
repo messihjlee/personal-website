@@ -63,7 +63,7 @@ export function DonatePanel() {
           href={socialLinks.email}
           style={{
             alignSelf: "start",
-            fontSize: 13,
+            fontSize: "0.8125rem",
             letterSpacing: "0.10em",
             color: "var(--muted)",
             textDecoration: "none",
@@ -79,7 +79,7 @@ export function DonatePanel() {
 }
 
 const noteStyle: React.CSSProperties = {
-  fontSize: 14,
+  fontSize: "0.875rem",
   lineHeight: 1.8,
   color: "var(--foreground)",
   margin: 0,

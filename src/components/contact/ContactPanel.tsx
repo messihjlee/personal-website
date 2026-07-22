@@ -87,7 +87,7 @@ export function ContactPanel() {
 
         <p
           style={{
-            fontSize: 14,
+            fontSize: "1rem",
             lineHeight: 1.8,
             color: "var(--foreground)",
             margin: 0,
@@ -104,7 +104,7 @@ export function ContactPanel() {
           rel="noopener noreferrer"
           style={{
             display: "inline-block",
-            fontSize: 13,
+            fontSize: "0.875rem",
             letterSpacing: "0.10em",
             color: "var(--foreground)",
             textDecoration: "none",

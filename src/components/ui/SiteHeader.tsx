@@ -30,7 +30,7 @@ const iconBtnStyle: React.CSSProperties = {
 };
 
 const labelStyle: React.CSSProperties = {
-  fontSize: 10,
+  fontSize: "0.625rem",
   letterSpacing: "0.14em",
   color: "var(--foreground)",
   textDecoration: "none",
@@ -131,7 +131,7 @@ export function SiteHeader() {
                     padding: "10px 16px",
                     borderBottom: i < navItems.length - 1 ? "1px solid var(--border)" : undefined,
                     ...labelStyle,
-                    fontSize: 12,
+                    fontSize: "0.75rem",
                   }}
                 >
                   {item.label}

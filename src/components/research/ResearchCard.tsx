@@ -33,7 +33,7 @@ export function ResearchCard({ pub }: { pub: Publication }) {
         <div style={{ minWidth: 0 }}>
           <div
             style={{
-              fontSize: 10,
+              fontSize: "0.625rem",
               letterSpacing: "0.14em",
               color: "var(--foreground)",
               marginBottom: 10,
@@ -41,7 +41,7 @@ export function ResearchCard({ pub }: { pub: Publication }) {
           >
             {pub.venue} · {pub.year}
           </div>
-          <h2 className="research-card-title" style={{ fontSize: 16, fontWeight: 600, lineHeight: 1.4, color: "var(--foreground)", margin: 0 }}>
+          <h2 className="research-card-title" style={{ fontSize: "1rem", fontWeight: 600, lineHeight: 1.4, color: "var(--foreground)", margin: 0 }}>
             {linkUrl ? (
               <a
                 href={linkUrl}
@@ -81,7 +81,7 @@ export function ResearchCard({ pub }: { pub: Publication }) {
 
       <p
         style={{
-          fontSize: 13,
+          fontSize: "0.8125rem",
           color: "var(--foreground)",
           lineHeight: 1.7,
           margin: 0,

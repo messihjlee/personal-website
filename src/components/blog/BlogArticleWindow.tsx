@@ -36,7 +36,7 @@ const mdxComponents = {
       target="_blank"
       rel="noopener noreferrer"
       style={{
-        display: "inline-block", marginTop: "1rem", fontSize: 12, letterSpacing: "0.14em",
+        display: "inline-block", marginTop: "1rem", fontSize: "0.8125rem", letterSpacing: "0.14em",
         color: "var(--foreground)", border: "1px solid var(--border)", padding: "8px 18px",
         textDecoration: "none", fontFamily: "inherit", cursor: "pointer",
       }}
@@ -45,13 +45,13 @@ const mdxComponents = {
     </a>
   ),
   h1: (props: React.ComponentProps<"h1">) => (
-    <h1 style={{ fontSize: 20, fontWeight: 600, marginTop: "2rem", marginBottom: "0.75rem", lineHeight: 1.3, fontFamily: "inherit" }} {...props} />
+    <h1 style={{ fontSize: "1.625rem", fontWeight: 600, marginTop: "2rem", marginBottom: "0.75rem", lineHeight: 1.3, fontFamily: "inherit" }} {...props} />
   ),
   h2: (props: React.ComponentProps<"h2">) => (
-    <h2 style={{ fontSize: 17, fontWeight: 600, marginTop: "1.75rem", marginBottom: "0.5rem", lineHeight: 1.3, fontFamily: "inherit" }} {...props} />
+    <h2 style={{ fontSize: "1.375rem", fontWeight: 600, marginTop: "1.75rem", marginBottom: "0.5rem", lineHeight: 1.3, fontFamily: "inherit" }} {...props} />
   ),
   h3: (props: React.ComponentProps<"h3">) => (
-    <h3 style={{ fontSize: 14, fontWeight: 600, marginTop: "1.5rem", marginBottom: "0.5rem", fontFamily: "inherit" }} {...props} />
+    <h3 style={{ fontSize: "1.125rem", fontWeight: 600, marginTop: "1.5rem", marginBottom: "0.5rem", fontFamily: "inherit" }} {...props} />
   ),
   p: (props: React.ComponentProps<"p">) => (
     <p style={{ marginBottom: "1rem", lineHeight: 1.85 }} {...props} />
@@ -66,7 +66,7 @@ const mdxComponents = {
     <ol style={{ marginBottom: "1rem", paddingLeft: "1.5rem", listStyleType: "decimal" }} {...props} />
   ),
   hr: (props: React.ComponentProps<"hr">) => (
-    <hr style={{ margin: "1.5rem 0", borderColor: "var(--border)" }} {...props} />
+    <hr style={{ margin: "0.75rem 0", borderColor: "var(--border)" }} {...props} />
   ),
   blockquote: (props: React.ComponentProps<"blockquote">) => (
     <blockquote style={{ borderLeft: "2px solid var(--border)", paddingLeft: "1rem", margin: "1.5rem 0", fontStyle: "italic", color: "var(--foreground)", fontWeight: 600 }} {...props} />
@@ -98,7 +98,7 @@ export function BlogArticleWindow({
   const [article, setArticle] = useState<ArticleData | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const { pos, onMouseDown, onTouchStart } = useDraggable(() => {
+  const { pos, size, onMouseDown, onTouchStart, startResize } = useDraggable(() => {
     const vw = window.innerWidth;
     const vh = window.innerHeight;
     const isMobile = vw < 720;
@@ -108,7 +108,7 @@ export function BlogArticleWindow({
       x: Math.max(EDGE_MARGIN, (vw - winW) / 2 + windowIndex * (isMobile ? 16 : 30)),
       y: Math.max(44, (vh - winH) / 2 + windowIndex * (isMobile ? 20 : 24)),
     };
-  });
+  }, 680, 680);
 
   useEffect(() => {
     fetch(`/api/blog/${slug}`)
@@ -130,8 +130,11 @@ export function BlogArticleWindow({
   const style: React.CSSProperties = {
     position: "fixed",
     top: pos.y,
-    ...paneHBounds(pos.x, 680),
-    height: "min(680px, calc(100svh - 84px))",
+    ...paneHBounds(pos.x, size.w),
+    // height tracks y so dragging down pins the bottom and shrinks the window,
+    // keeping the title bar in view — the vertical mirror of paneHBounds. A
+    // fixed height here let the body slide off the bottom of the viewport.
+    height: `min(${size.h}px, calc(100svh - ${Math.round(pos.y) + EDGE_MARGIN}px))`,
     zIndex: 10,
   };
 
@@ -142,6 +145,7 @@ export function BlogArticleWindow({
       onClose={onClose}
       onActivate={onActivate}
       dragProps={{ onMouseDown, onTouchStart }}
+      onResizeStart={startResize}
       style={style}
     >
       {articleBody(article, loading)}
@@ -153,7 +157,7 @@ function articleBody(article: ArticleData | null, loading: boolean) {
   if (loading) {
     return (
       <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: 48 }}>
-        <span style={{ fontSize: 10, letterSpacing: "0.14em", color: "var(--muted)" }}>loading…</span>
+        <span style={{ fontSize: "0.6875rem", letterSpacing: "0.14em", color: "var(--muted)" }}>loading…</span>
       </div>
     );
   }
@@ -161,7 +165,7 @@ function articleBody(article: ArticleData | null, loading: boolean) {
   if (!article) {
     return (
       <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: 48 }}>
-        <span style={{ fontSize: 10, letterSpacing: "0.14em", color: "var(--muted)" }}>not found</span>
+        <span style={{ fontSize: "0.6875rem", letterSpacing: "0.14em", color: "var(--muted)" }}>not found</span>
       </div>
     );
   }
@@ -183,13 +187,13 @@ function articleBody(article: ArticleData | null, loading: boolean) {
         <header style={{ marginBottom: 32 }}>
           <h1
             style={{
-              fontSize: 20, fontWeight: 600, lineHeight: 1.35,
+              fontSize: "1.625rem", fontWeight: 600, lineHeight: 1.35,
               color: "var(--foreground)", marginBottom: 12, fontFamily: "inherit",
             }}
           >
             {article.title}
           </h1>
-          <time style={{ display: "block", fontSize: 10, letterSpacing: "0.12em", color: "var(--muted)", marginBottom: 12 }}>
+          <time style={{ display: "block", fontSize: "0.8125rem", letterSpacing: "0.12em", color: "var(--muted)", marginBottom: 12 }}>
             {new Date(article.date).toLocaleDateString("en-US", {
               year: "numeric", month: "long", day: "numeric",
             })}
@@ -200,7 +204,7 @@ function articleBody(article: ArticleData | null, loading: boolean) {
                 <span
                   key={tag}
                   style={{
-                    background: "none", color: "var(--muted)", fontSize: 10,
+                    background: "none", color: "var(--muted)", fontSize: "0.6875rem",
                     letterSpacing: "0.14em", padding: "4px 10px",
                     border: "1px solid var(--border)",
                   }}
@@ -211,7 +215,7 @@ function articleBody(article: ArticleData | null, loading: boolean) {
             </div>
           )}
         </header>
-        <div style={{ color: "var(--foreground)", fontSize: 15, lineHeight: 1.85 }}>
+        <div style={{ color: "var(--foreground)", fontSize: "1rem", lineHeight: 1.85 }}>
           <MDXRemote {...article.mdxSource} components={mdxComponents as never} />
         </div>
       </article>

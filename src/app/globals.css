@@ -41,11 +41,22 @@
   --font-sans: var(--font-poppins);
 }
 
+/* Fluid root: the whole design is sized in rem, so scaling the root font-size
+   scales text, spacing and the rem-based max-widths together. The clamp holds
+   at 16px through laptop widths (≤1280px) so phones and laptops render exactly
+   as before, then ramps to 22px by ~2560px so the layout doesn't shrink into a
+   tiny column on a full-screen desktop monitor. */
+html {
+  font-size: clamp(16px, 10px + 0.47vw, 22px);
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-poppins), var(--font-sans), system-ui, sans-serif;
-  font-size: 15px;
+  /* 0.9375rem = 15px at the 16px floor, preserving the current base size on
+     laptops/phones while it scales up with the root on large screens */
+  font-size: 0.9375rem;
   line-height: 1.6;
 }
 
@@ -72,11 +83,11 @@ html.home-locked body {
 
 .pub-title-short { display: none; }
 
-.pub-card-date  { font-size: 13px; }
-.pub-card-title { font-size: 16px; }
+.pub-card-date  { font-size: 0.8125rem; }
+.pub-card-title { font-size: 1rem; }
 
-.blog-card-date  { font-size: 13px; }
-.blog-card-title { font-size: 16px; }
+.blog-card-date  { font-size: 0.8125rem; }
+.blog-card-title { font-size: 1rem; }
 
 /* ---- card window ------------------------------------------------------
    Panes across the site: a hairline border and softly rounded, iOS-style
@@ -109,7 +120,7 @@ html.home-locked body {
   /* at the narrow end the widest labels ("collapse", "research") only fit if
      the type tightens with the box */
   .pixel-edge {
-    font-size: 11px !important;
+    font-size: 0.6875rem !important;
     letter-spacing: 0.02em !important;
   }
 }
@@ -136,7 +147,7 @@ html.home-locked body {
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 13px;
+  font-size: 0.8125rem;
   letter-spacing: 0.14em;
   color: var(--foreground);
   min-width: 0;
@@ -209,17 +220,17 @@ html.home-locked body {
   }
 
   .grid-card-title {
-    font-size: 10px !important;
+    font-size: 0.625rem !important;
   }
 
   .pub-title-full { display: none; }
-  .pub-title-short { display: block; font-size: 10px; }
+  .pub-title-short { display: block; font-size: 0.625rem; }
 
-  .pub-card-date  { font-size: 10px; }
-  .pub-card-title { font-size: 10px; }
+  .pub-card-date  { font-size: 0.625rem; }
+  .pub-card-title { font-size: 0.625rem; }
 
-  .blog-card-date  { font-size: 10px; }
-  .blog-card-title { font-size: 10px; }
+  .blog-card-date  { font-size: 0.625rem; }
+  .blog-card-title { font-size: 0.625rem; }
 
   .site-header-right {
     overflow-x: auto;

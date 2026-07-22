@@ -11,12 +11,17 @@
 
 export const SUIT = "♠";
 
+// the eight directions a window can be resized from; two-letter values are the
+// corners. See ResizeHandles below and useDraggable's startResize.
+export type ResizeDir = "n" | "s" | "e" | "w" | "ne" | "nw" | "se" | "sw";
+
 export function CardWindow({
   label,
   subtitle,
   onClose,
   onActivate,
   dragProps,
+  onResizeStart,
   footer,
   style,
   className,
@@ -32,6 +37,8 @@ export function CardWindow({
     onMouseDown?: (e: React.MouseEvent) => void;
     onTouchStart?: (e: React.TouchEvent) => void;
   };
+  // when set, the window shows resize handles on every edge and corner
+  onResizeStart?: (dir: ResizeDir, e: React.PointerEvent) => void;
   footer?: React.ReactNode;
   style?: React.CSSProperties;
   className?: string;
@@ -47,6 +54,7 @@ export function CardWindow({
       className={className ? `card-window ${className}` : "card-window"}
       style={style}
     >
+      {onResizeStart && <ResizeHandles onResizeStart={onResizeStart} />}
       <div className="card-window-inner">
         <div
           onMouseDown={draggable ? dragProps?.onMouseDown : undefined}
@@ -92,6 +100,52 @@ export function CardWindow({
         {footer}
       </div>
     </div>
+  );
+}
+
+// grab widths for the resize strips: a thin band along each edge, a larger
+// square at each corner so both axes are easy to catch
+const EDGE_GRAB = 7;
+const CORNER_GRAB = 15;
+
+const RESIZE_HANDLES: { dir: ResizeDir; style: React.CSSProperties }[] = [
+  { dir: "n", style: { top: 0, left: 0, right: 0, height: EDGE_GRAB, cursor: "ns-resize" } },
+  { dir: "s", style: { bottom: 0, left: 0, right: 0, height: EDGE_GRAB, cursor: "ns-resize" } },
+  { dir: "e", style: { top: 0, right: 0, bottom: 0, width: EDGE_GRAB, cursor: "ew-resize" } },
+  { dir: "w", style: { top: 0, left: 0, bottom: 0, width: EDGE_GRAB, cursor: "ew-resize" } },
+  { dir: "ne", style: { top: 0, right: 0, width: CORNER_GRAB, height: CORNER_GRAB, cursor: "nesw-resize" } },
+  { dir: "nw", style: { top: 0, left: 0, width: CORNER_GRAB, height: CORNER_GRAB, cursor: "nwse-resize" } },
+  { dir: "se", style: { bottom: 0, right: 0, width: CORNER_GRAB, height: CORNER_GRAB, cursor: "nwse-resize" } },
+  { dir: "sw", style: { bottom: 0, left: 0, width: CORNER_GRAB, height: CORNER_GRAB, cursor: "nesw-resize" } },
+];
+
+/**
+ * The eight invisible grab strips laid over a window's edges and corners. They
+ * sit above the body so a press near the edge starts a resize; corners stack
+ * above the edges so the diagonal cursor wins where they overlap. The frame's
+ * overflow: hidden trims them to the rounded corners.
+ */
+function ResizeHandles({
+  onResizeStart,
+}: {
+  onResizeStart: (dir: ResizeDir, e: React.PointerEvent) => void;
+}) {
+  return (
+    <>
+      {RESIZE_HANDLES.map(({ dir, style }) => (
+        <div
+          key={dir}
+          onPointerDown={(e) => onResizeStart(dir, e)}
+          style={{
+            position: "absolute",
+            touchAction: "none",
+            // corners (two-letter dirs) ride above the edges they overlap
+            zIndex: dir.length === 2 ? 6 : 5,
+            ...style,
+          }}
+        />
+      ))}
+    </>
   );
 }
 

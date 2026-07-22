@@ -16,22 +16,28 @@ const WINDOW_H_EXPANDED = 660;
 // every item reserves the same block: 2 lines of title, 1 of authors, 7 of
 // abstract — so the window is the same size whatever the item's text length
 const TITLE_LINES = 2;
-const TITLE_SIZE = 18;
+// title, authors and abstract in rem so they scale with the root font like the
+// blog article body; each sits 20% above the base pane text. The reserved-line
+// heights (h2/author boxes below) are rem too, so they grow with the text.
+const TITLE_SIZE = 1.35; // rem
 const TITLE_LH = 1.4;
-const AUTHOR_SIZE = 13;
+const AUTHOR_SIZE = 0.975; // rem
 const AUTHOR_LH = 1.6;
 const ABSTRACT_LINES = 7;
-const ABSTRACT_SIZE = 13;
+const ABSTRACT_SIZE = 0.975; // rem
 const ABSTRACT_LH = 1.8;
+// px per rem at the base root size — the windowing system (centring, size.h) is
+// all px, so the rem sizes above convert through this for the height math
+const REM = 16;
 
 // body padding (42) + gaps (36) + divider (1) + the three reserved text blocks,
 // plus the title bar, link row and nav bar — used only to centre the window on
 // open; the real height comes from the content
 const COLLAPSED_H = Math.round(
   BAR_H * 2 + 55 + 79 +
-    TITLE_SIZE * TITLE_LH * TITLE_LINES +
-    AUTHOR_SIZE * AUTHOR_LH +
-    ABSTRACT_SIZE * ABSTRACT_LH * ABSTRACT_LINES,
+    TITLE_SIZE * REM * TITLE_LH * TITLE_LINES +
+    AUTHOR_SIZE * REM * AUTHOR_LH +
+    ABSTRACT_SIZE * REM * ABSTRACT_LH * ABSTRACT_LINES,
 );
 
 function clamp(lines: number): React.CSSProperties {
@@ -91,10 +97,17 @@ export function ResearchPanel({ publications }: { publications: Publication[] })
   function goTo(i: number) {
     setIndex(i);
     setExpanded(false);
+    // every article opens collapsed at the same height, so its own "expand"
+    // starts fresh — otherwise the window kept the previous item's expanded size
+    setSize((s) => ({ ...s, h: COLLAPSED_H }));
   }
 
   function toggleExpanded() {
-    setExpanded((v) => !v);
+    const next = !expanded;
+    setExpanded(next);
+    // the window now carries an explicit height (so it can be resized); expand
+    // and collapse move it between the two designed sizes
+    setSize((s) => ({ ...s, h: next ? WINDOW_H_EXPANDED : COLLAPSED_H }));
     recenter.current = true;
   }
 
@@ -112,7 +125,7 @@ export function ResearchPanel({ publications }: { publications: Publication[] })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [expanded]);
 
-  const { pos, setPos, onMouseDown, onTouchStart } = useDraggable(() => {
+  const { pos, setPos, size, setSize, onMouseDown, onTouchStart, startResize } = useDraggable(() => {
     const vw = window.innerWidth;
     const vh = window.innerHeight;
     const winW = Math.min(WINDOW_W, vw - 2 * EDGE_MARGIN);
@@ -121,7 +134,7 @@ export function ResearchPanel({ publications }: { publications: Publication[] })
       x: Math.max(EDGE_MARGIN, (vw - winW) / 2),
       y: Math.max(WINDOW_TOP, (vh - BOTTOM_RESERVED - winH) / 2),
     };
-  });
+  }, WINDOW_W, COLLAPSED_H);
 
   // pos is a dependency because the panel renders nothing until useDraggable has
   // placed it — without it this measures a null ref on mount and never re-runs,
@@ -147,14 +160,11 @@ export function ResearchPanel({ publications }: { publications: Publication[] })
   const windowStyle: React.CSSProperties = {
     position: "fixed",
     top: pos.y,
-    ...paneHBounds(pos.x, WINDOW_W),
-    // collapsed, the reserved line counts fix the height exactly; expanded,
-    // it grows but never past the bottom of the viewport
-    height: expanded
-      ? `min(${WINDOW_H_EXPANDED}px, calc(100svh - ${Math.round(pos.y) + EDGE_MARGIN}px))`
-      : "auto",
-    maxHeight: `calc(100svh - ${Math.round(pos.y) + EDGE_MARGIN}px)`,
-    transition: "height 0.2s ease",
+    ...paneHBounds(pos.x, size.w),
+    // an explicit height so the window can be resized from any edge; it still
+    // shrinks with the live position so the bottom never leaves the screen. No
+    // height transition — it would lag the pointer while resizing.
+    height: `min(${size.h}px, calc(100svh - ${Math.round(pos.y) + EDGE_MARGIN}px))`,
     zIndex: 10,
   };
 
@@ -166,6 +176,7 @@ export function ResearchPanel({ publications }: { publications: Publication[] })
       onClose={close}
       onActivate={activate}
       dragProps={{ onMouseDown, onTouchStart }}
+      onResizeStart={startResize}
       style={windowStyle}
       footer={
         <NavBar
@@ -182,9 +193,11 @@ export function ResearchPanel({ publications }: { publications: Publication[] })
           <div
             className="research-panel-body"
             style={{
-              flex: expanded ? 1 : "0 0 auto",
+              // always fill the window and scroll if the content is taller, so
+              // the links row and nav bar stay pinned when the window is resized
+              flex: 1,
               minHeight: 0,
-              overflowY: expanded ? "auto" : "hidden",
+              overflowY: "auto",
               padding: "22px 24px 20px",
               display: "flex",
               flexDirection: "column",
@@ -193,13 +206,13 @@ export function ResearchPanel({ publications }: { publications: Publication[] })
           >
             <h2
               style={{
-                fontSize: TITLE_SIZE,
+                fontSize: `${TITLE_SIZE}rem`,
                 fontWeight: 600,
                 lineHeight: TITLE_LH,
                 color: "var(--foreground)",
                 margin: 0,
                 fontFamily: "inherit",
-                height: TITLE_SIZE * TITLE_LH * TITLE_LINES,
+                height: `${TITLE_SIZE * TITLE_LH * TITLE_LINES}rem`,
                 flexShrink: 0,
                 ...clamp(TITLE_LINES),
               }}
@@ -208,11 +221,11 @@ export function ResearchPanel({ publications }: { publications: Publication[] })
             </h2>
             <p
               style={{
-                fontSize: AUTHOR_SIZE,
+                fontSize: `${AUTHOR_SIZE}rem`,
                 lineHeight: AUTHOR_LH,
                 color: "var(--foreground)",
                 margin: 0,
-                height: AUTHOR_SIZE * AUTHOR_LH,
+                height: `${AUTHOR_SIZE * AUTHOR_LH}rem`,
                 flexShrink: 0,
                 ...clamp(1),
               }}
@@ -223,7 +236,7 @@ export function ResearchPanel({ publications }: { publications: Publication[] })
             <p
               ref={abstractRef}
               style={{
-                fontSize: ABSTRACT_SIZE,
+                fontSize: `${ABSTRACT_SIZE}rem`,
                 lineHeight: ABSTRACT_LH,
                 color: "var(--foreground)",
                 margin: 0,

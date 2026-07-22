@@ -38,7 +38,7 @@ export function ResearchSlider({ publications }: { publications: Publication[] }
     >
       <div
         style={{
-          fontSize: 10,
+          fontSize: "0.625rem",
           letterSpacing: "0.18em",
           color: "var(--muted)",
           textTransform: "uppercase",
@@ -79,7 +79,7 @@ export function ResearchSlider({ publications }: { publications: Publication[] }
         style={{
           marginTop: 24,
           textAlign: "center",
-          fontSize: 10,
+          fontSize: "0.625rem",
           letterSpacing: "0.12em",
           color: "var(--muted)",
           textTransform: "uppercase",

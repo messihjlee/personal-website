@@ -63,7 +63,7 @@ function PubCard({
         >
           <p
             style={{
-              fontSize: 13,
+              fontSize: "0.8125rem",
               lineHeight: 1.7,
               color: "rgba(255,255,255,0.85)",
               margin: 0,
@@ -150,7 +150,7 @@ function PubModal({
         >
           <span
             style={{
-              fontSize: 10,
+              fontSize: "0.625rem",
               letterSpacing: "0.14em",
               color: "var(--foreground)",
             }}
@@ -177,7 +177,7 @@ function PubModal({
         <div style={{ overflowY: "auto", padding: "20px 16px", flex: 1 }}>
           <h2
             style={{
-              fontSize: 16,
+              fontSize: "1rem",
               fontWeight: 600,
               lineHeight: 1.4,
               color: "var(--foreground)",
@@ -189,7 +189,7 @@ function PubModal({
           </h2>
           <p
             style={{
-              fontSize: 11,
+              fontSize: "0.6875rem",
               color: "var(--foreground)",
               margin: "0 0 20px",
               lineHeight: 1.6,
@@ -200,7 +200,7 @@ function PubModal({
           <div style={{ height: 1, background: "var(--border)", marginBottom: 20 }} />
           <p
             style={{
-              fontSize: 13,
+              fontSize: "0.8125rem",
               color: "var(--foreground)",
               lineHeight: 1.8,
               margin: 0,
@@ -230,7 +230,7 @@ function PubModal({
                   display: "flex",
                   alignItems: "center",
                   gap: 6,
-                  fontSize: 10,
+                  fontSize: "0.625rem",
                   letterSpacing: "0.1em",
                   color: "var(--foreground)",
                   textDecoration: "none",
@@ -250,7 +250,7 @@ function PubModal({
                   display: "flex",
                   alignItems: "center",
                   gap: 6,
-                  fontSize: 10,
+                  fontSize: "0.625rem",
                   letterSpacing: "0.1em",
                   color: "var(--foreground)",
                   textDecoration: "none",
@@ -270,7 +270,7 @@ function PubModal({
                   display: "flex",
                   alignItems: "center",
                   gap: 6,
-                  fontSize: 10,
+                  fontSize: "0.625rem",
                   letterSpacing: "0.1em",
                   color: "var(--foreground)",
                   textDecoration: "none",
@@ -325,7 +325,7 @@ export function ResearchGrid({ publications }: { publications: Publication[] }) 
               onClick={() => setPage((p) => Math.max(0, p - 1))}
               disabled={page === 0}
               style={{
-                fontSize: 10,
+                fontSize: "0.625rem",
                 letterSpacing: "0.12em",
                 color: page === 0 ? "var(--disabled)" : "var(--foreground)",
                 background: "none",
@@ -337,14 +337,14 @@ export function ResearchGrid({ publications }: { publications: Publication[] }) 
             >
               prev
             </button>
-            <span style={{ fontSize: 10, letterSpacing: "0.12em", color: "var(--muted)", alignSelf: "center" }}>
+            <span style={{ fontSize: "0.625rem", letterSpacing: "0.12em", color: "var(--muted)", alignSelf: "center" }}>
               {page + 1} / {totalPages}
             </span>
             <button
               onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
               disabled={page === totalPages - 1}
               style={{
-                fontSize: 10,
+                fontSize: "0.625rem",
                 letterSpacing: "0.12em",
                 color: page === totalPages - 1 ? "var(--disabled)" : "var(--foreground)",
                 background: "none",

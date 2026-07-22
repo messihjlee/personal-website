@@ -47,7 +47,7 @@ export function Pane({
 }: PaneProps) {
   const { close, activate } = useWindowChrome({ id, label });
 
-  const { pos, onMouseDown, onTouchStart } = useDraggable(() => {
+  const { pos, size, onMouseDown, onTouchStart, startResize } = useDraggable(() => {
     const vw = window.innerWidth;
     const vh = window.innerHeight;
     const winW = Math.min(width, vw - 2 * EDGE_MARGIN);
@@ -56,15 +56,15 @@ export function Pane({
       x: Math.max(EDGE_MARGIN, (vw - winW) / 2),
       y: Math.max(WINDOW_TOP, (vh - BOTTOM_RESERVED - winH) / 2),
     };
-  });
+  }, width, height);
 
   if (!pos) return null;
 
   const base: React.CSSProperties = {
     position: "fixed",
     top: pos.y,
-    ...paneHBounds(pos.x, width),
-    height: `min(${height}px, calc(100svh - ${Math.round(pos.y) + EDGE_MARGIN}px))`,
+    ...paneHBounds(pos.x, size.w),
+    height: `min(${size.h}px, calc(100svh - ${Math.round(pos.y) + EDGE_MARGIN}px))`,
     zIndex,
   };
 
@@ -75,6 +75,7 @@ export function Pane({
       onClose={onClose ?? close}
       onActivate={activate}
       dragProps={{ onMouseDown, onTouchStart }}
+      onResizeStart={startResize}
       style={base}
       footer={footer}
     >

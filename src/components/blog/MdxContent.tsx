@@ -10,7 +10,7 @@ function CVButton({ href }: { href: string }) {
       style={{
         display: "inline-block",
         marginTop: "1rem",
-        fontSize: 12,
+        fontSize: "0.75rem",
         letterSpacing: "0.14em",
         color: "var(--foreground)",
         border: "1px solid var(--border)",

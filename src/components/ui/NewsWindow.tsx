@@ -22,15 +22,15 @@ export function NewsWindow({ item, onClose }: { item: NotificationItem; onClose:
           gap: 14,
         }}
       >
-        <div style={{ fontSize: 11, letterSpacing: "0.14em", color: "var(--muted)" }}>{item.date}</div>
-        <h2 style={{ fontSize: 18, fontWeight: 700, lineHeight: 1.4, color: "var(--foreground)", margin: 0 }}>
+        <div style={{ fontSize: "0.6875rem", letterSpacing: "0.14em", color: "var(--muted)" }}>{item.date}</div>
+        <h2 style={{ fontSize: "1.125rem", fontWeight: 700, lineHeight: 1.4, color: "var(--foreground)", margin: 0 }}>
           {item.title}
         </h2>
         {item.body.split("\n\n").map((para, i) => (
           <p
             key={i}
             style={{
-              fontSize: 14,
+              fontSize: "0.875rem",
               lineHeight: 1.8,
               letterSpacing: "0.02em",
               color: "var(--foreground)",

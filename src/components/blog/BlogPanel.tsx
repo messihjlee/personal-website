@@ -29,7 +29,7 @@ export function BlogPanel({
   const [index, setIndex] = useState(0);
   const { close, activate } = useWindowChrome({ id: "blog", label: "blog" });
 
-  const { pos, onMouseDown, onTouchStart } = useDraggable(() => {
+  const { pos, size, onMouseDown, onTouchStart, startResize } = useDraggable(() => {
     const vw = window.innerWidth;
     const vh = window.innerHeight;
     const winW = Math.min(WINDOW_W, vw - 2 * EDGE_MARGIN);
@@ -38,7 +38,7 @@ export function BlogPanel({
       x: Math.max(EDGE_MARGIN, (vw - winW) / 2),
       y: Math.max(WINDOW_TOP, (vh - BOTTOM_RESERVED - winH) / 2),
     };
-  });
+  }, WINDOW_W, WINDOW_H);
 
   const items = useMemo(
     () => (category ? posts.filter((p) => p.tags[0] === category) : posts),
@@ -82,7 +82,7 @@ export function BlogPanel({
             className="pixel-edge"
             onClick={() => selectCategory(cat)}
             style={{
-              fontSize: 13,
+              fontSize: "0.8125rem",
               letterSpacing: "0.12em",
               color: isActive ? "var(--background)" : "var(--muted)",
               background: isActive ? "var(--foreground)" : "var(--background)",
@@ -104,10 +104,10 @@ export function BlogPanel({
   const style: React.CSSProperties = {
     position: "fixed",
     top: pos.y,
-    ...paneHBounds(pos.x, WINDOW_W),
+    ...paneHBounds(pos.x, size.w),
     // height tracks the live position, like every other pane: drag the
     // window down and it shrinks so its bottom edge never leaves the screen
-    height: `min(${WINDOW_H}px, calc(100svh - ${Math.round(pos.y) + EDGE_MARGIN}px))`,
+    height: `min(${size.h}px, calc(100svh - ${Math.round(pos.y) + EDGE_MARGIN}px))`,
     zIndex: 10,
   };
 
@@ -130,6 +130,7 @@ export function BlogPanel({
         onClose={close}
         onActivate={activate}
         dragProps={{ onMouseDown, onTouchStart }}
+        onResizeStart={startResize}
         style={style}
         footer={
           <NavBar
@@ -164,12 +165,12 @@ export function BlogPanel({
                 background: "var(--background)",
               }}
             >
-              <time style={{ fontSize: 10, letterSpacing: "0.12em", color: "var(--muted)" }}>
+              <time style={{ fontSize: "0.75rem", letterSpacing: "0.12em", color: "var(--muted)" }}>
                 {new Date(post.date).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}
               </time>
               <h2
                 style={{
-                  fontSize: 20,
+                  fontSize: "1.25rem",
                   fontWeight: 600,
                   lineHeight: 1.35,
                   color: "var(--foreground)",
@@ -186,7 +187,7 @@ export function BlogPanel({
               {post.description && (
                 <p
                   style={{
-                    fontSize: 14,
+                    fontSize: "0.875rem",
                     lineHeight: 1.7,
                     color: "var(--muted)",
                     margin: 0,
@@ -203,7 +204,7 @@ export function BlogPanel({
                 className="pixel-edge"
                 onClick={() => onOpen?.(post.slug)}
                 style={{
-                  fontSize: 13,
+                  fontSize: "0.8125rem",
                   letterSpacing: "0.14em",
                   color: "var(--foreground)",
                   background: "none",

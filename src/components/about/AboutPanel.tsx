@@ -72,7 +72,7 @@ export function AboutPanel({ sections }: { sections: Section[] }) {
           minHeight: 0,
           overflowY: "auto",
           display: "flex",
-          fontSize: 15,
+          fontSize: "0.9375rem",
           lineHeight: 1.85,
           color: "var(--foreground)",
         }}

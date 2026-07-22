@@ -39,7 +39,7 @@ export function BlogSlider({ posts }: { posts: BlogPost[] }) {
             onClick={() => setPage((p) => Math.max(0, p - 1))}
             disabled={page === 0}
             style={{
-              fontSize: 10,
+              fontSize: "0.625rem",
               letterSpacing: "0.12em",
               color: page === 0 ? "var(--disabled)" : "var(--foreground)",
               background: "none",
@@ -51,14 +51,14 @@ export function BlogSlider({ posts }: { posts: BlogPost[] }) {
           >
             prev
           </button>
-          <span style={{ fontSize: 10, letterSpacing: "0.12em", color: "var(--muted)", alignSelf: "center" }}>
+          <span style={{ fontSize: "0.625rem", letterSpacing: "0.12em", color: "var(--muted)", alignSelf: "center" }}>
             {page + 1} / {totalPages}
           </span>
           <button
             onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
             disabled={page === totalPages - 1}
             style={{
-              fontSize: 10,
+              fontSize: "0.625rem",
               letterSpacing: "0.12em",
               color: page === totalPages - 1 ? "var(--disabled)" : "var(--foreground)",
               background: "none",

@@ -91,7 +91,7 @@ export function NotificationBell() {
             <div
               style={{
                 padding: "9px 14px",
-                fontSize: 10,
+                fontSize: "0.625rem",
                 letterSpacing: "0.16em",
                 textTransform: "uppercase",
                 color: "var(--muted)",
@@ -101,7 +101,7 @@ export function NotificationBell() {
               notifications
             </div>
             {notifications.length === 0 ? (
-              <div style={{ padding: "14px", fontSize: 12, color: "var(--muted)" }}>
+              <div style={{ padding: "14px", fontSize: "0.75rem", color: "var(--muted)" }}>
                 nothing new
               </div>
             ) : (
@@ -127,10 +127,10 @@ export function NotificationBell() {
                   onMouseEnter={(e) => ((e.currentTarget as HTMLButtonElement).style.background = "var(--card)")}
                   onMouseLeave={(e) => ((e.currentTarget as HTMLButtonElement).style.background = "none")}
                 >
-                  <span style={{ display: "block", fontSize: 12, lineHeight: 1.45, letterSpacing: "0.02em" }}>
+                  <span style={{ display: "block", fontSize: "0.75rem", lineHeight: 1.45, letterSpacing: "0.02em" }}>
                     {item.shortTitle}
                   </span>
-                  <span style={{ display: "block", fontSize: 10, letterSpacing: "0.12em", color: "var(--muted)", marginTop: 3 }}>
+                  <span style={{ display: "block", fontSize: "0.625rem", letterSpacing: "0.12em", color: "var(--muted)", marginTop: 3 }}>
                     {item.date}
                   </span>
                 </button>
